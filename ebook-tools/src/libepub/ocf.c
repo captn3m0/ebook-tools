@@ -210,7 +210,7 @@ char *_ocf_root_by_type(struct ocf *ocf, char *type) {
   char *rootXml;
 
   while (curr) {
-    if (strcpy(curr->mediatype, type) == 0) {
+    if (strcmp(curr->mediatype, type) == 0) {
       _ocf_get_file(ocf, curr->fullpath, &rootXml);
       return rootXml;
     }

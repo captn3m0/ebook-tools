@@ -40,6 +40,10 @@ struct ocf {
   struct epub *epub; // back pointer
 };
 
+struct opf {
+
+};
+
 struct epuberr {
   char lastStr[1025];
   int len;
@@ -48,6 +52,7 @@ struct epuberr {
 // general structs
 struct epub {
   struct ocf *ocf;
+  struct opf *opf;
   struct epuberr *error;
   int debug;
 
@@ -57,24 +62,33 @@ enum {
   DEBUG_NONE,
   DEBUG_ERROR,
   DEBUG_WARNING,
-  DEBUG_INFO
+  DEBUG_INFO,
+  DEBUG_VERBOSE
 };
 
-// private functions
-void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
 
+// Ocf functions
 struct ocf *_ocf_parse(struct epub *epub, char *filename);
 void _ocf_dump(struct ocf *ocf);
 void _ocf_close(struct ocf *ocf);
 struct zip *_ocf_open(struct ocf *ocf, char *fileName);
 int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr);
 int _ocf_check_file(struct ocf *ocf, const char *filename);
+char *_ocf_root_by_type(struct ocf *ocf, char *type);
 
+// Parsing ocf
 int _ocf_parse_container(struct ocf *ocf);
 int _ocf_parse_mimetype(struct ocf *ocf);
 
+// parsing opf
+struct opf *_opf_parse(struct epub *epub, char *opfStr);
+void _opf_dump(struct opf *opf);
+void _opf_close(struct opf *opf);
+
+// epub functions
 struct epub *epub_open(char *filename, int debug);
 void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
 char *epub_last_errStr(struct epub *epub);
+void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
 
 #endif /* epublib_h */ 

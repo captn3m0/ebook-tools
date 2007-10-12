@@ -4,14 +4,25 @@
 struct epub *epub_open(char *filename, int debug) {
   struct epub *epub = malloc(sizeof(struct epub));
   epub->ocf = NULL;
+  epub->opf = NULL;
+
   epub->error = malloc(sizeof(struct epuberr));
   epub->debug = debug;
   _epub_print_debug(epub, DEBUG_INFO, "opening %s", filename);
   
   LIBXML_TEST_VERSION;
   
-  if (! (epub->ocf = _ocf_parse(epub, filename)))
+  if (! (epub->ocf = _ocf_parse(epub, filename))) {
+    epub_close(epub);
     return NULL;
+  }
+  char *opfStr = _ocf_root_by_type(epub->ocf, "application/oebps-package+xml");
+  if (!opfStr) {
+    epub_close(epub);
+    return NULL;
+  }
+  epub->opf = _opf_parse(epub, opfStr);
+  free(opfStr);
 
   return epub;
 }
@@ -20,8 +31,13 @@ int epub_close(struct epub *epub) {
   if (epub->ocf)
     _ocf_close(epub->ocf);
 
+  if (epub->opf)
+    _opf_close(epub->opf);
+
   if (epub)
     free(epub);
+
+  
   return 1;
 }
 
@@ -55,6 +71,9 @@ void _epub_print_debug(struct epub *epub, int debug, char *format, ...) {
       break;
     case DEBUG_INFO:
       fprintf(stderr, "(II)");
+      break;
+    case DEBUG_VERBOSE:
+      fprintf(stderr, "(VV)");
       break;
     }
     fprintf(stderr, ": \t%s\n" , strerr);

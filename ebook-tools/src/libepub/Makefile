@@ -34,10 +34,10 @@ RM = /usr/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/nakee/projects/ebook-tools
+CMAKE_SOURCE_DIR = /home/nakee/projects/ebook-tools/ebook-tools
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/nakee/projects/ebook-tools
+CMAKE_BINARY_DIR = /home/nakee/projects/ebook-tools/ebook-tools
 
 # Include the progress variables for this target.
 include CMakeFiles/progress.make
@@ -48,7 +48,7 @@ include CMakeFiles/progress.make
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	cd /home/nakee/projects/ebook-tools/src/libepub && /usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	cd /home/nakee/projects/ebook-tools/ebook-tools/src/libepub && /usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 
 # Special rule for the target edit_cache
 edit_cache/fast: edit_cache
@@ -56,31 +56,31 @@ edit_cache/fast: edit_cache
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	cd /home/nakee/projects/ebook-tools/src/libepub && /usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	cd /home/nakee/projects/ebook-tools/ebook-tools/src/libepub && /usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 
 # Special rule for the target rebuild_cache
 rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/nakee/projects/ebook-tools && $(CMAKE_COMMAND) -E cmake_progress_start /home/nakee/projects/ebook-tools/CMakeFiles $(CMAKE_ALL_PROGRESS)
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f CMakeFiles/Makefile2 src/libepub/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/nakee/projects/ebook-tools/CMakeFiles 0
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(CMAKE_COMMAND) -E cmake_progress_start /home/nakee/projects/ebook-tools/ebook-tools/CMakeFiles $(CMAKE_ALL_PROGRESS)
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f CMakeFiles/Makefile2 src/libepub/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/nakee/projects/ebook-tools/ebook-tools/CMakeFiles 0
 
 # The main clean target
 clean:
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f CMakeFiles/Makefile2 src/libepub/clean
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f CMakeFiles/Makefile2 src/libepub/clean
 
 # The main clean target
 clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f CMakeFiles/Makefile2 src/libepub/preinstall
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f CMakeFiles/Makefile2 src/libepub/preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f CMakeFiles/Makefile2 src/libepub/preinstall
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f CMakeFiles/Makefile2 src/libepub/preinstall
 
 # clear depends
 depend:
@@ -88,38 +88,50 @@ depend:
 
 # Convenience name for target.
 src/libepub/CMakeFiles/epub.dir/rule:
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f CMakeFiles/Makefile2 src/libepub/CMakeFiles/epub.dir/rule
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f CMakeFiles/Makefile2 src/libepub/CMakeFiles/epub.dir/rule
 
 # Convenience name for target.
 epub: src/libepub/CMakeFiles/epub.dir/rule
 
 # fast build rule for target.
 epub/fast:
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/build
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/build
 
 # target to build an object file
 epub.o:
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/epub.o
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/epub.o
 
 # target to preprocess a source file
 epub.i:
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/epub.i
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/epub.i
 
 # target to generate assembly for a file
 epub.s:
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/epub.s
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/epub.s
 
 # target to build an object file
 ocf.o:
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/ocf.o
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/ocf.o
 
 # target to preprocess a source file
 ocf.i:
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/ocf.i
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/ocf.i
 
 # target to generate assembly for a file
 ocf.s:
-	cd /home/nakee/projects/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/ocf.s
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/ocf.s
+
+# target to build an object file
+opf.o:
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/opf.o
+
+# target to preprocess a source file
+opf.i:
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/opf.i
+
+# target to generate assembly for a file
+opf.s:
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(MAKE) -f src/libepub/CMakeFiles/epub.dir/build.make src/libepub/CMakeFiles/epub.dir/opf.s
 
 # Help Target
 help::
@@ -136,6 +148,9 @@ help::
 	@echo "... ocf.o"
 	@echo "... ocf.i"
 	@echo "... ocf.s"
+	@echo "... opf.o"
+	@echo "... opf.i"
+	@echo "... opf.s"
 
 
 
@@ -146,5 +161,5 @@ help::
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/nakee/projects/ebook-tools && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/nakee/projects/ebook-tools/ebook-tools && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 

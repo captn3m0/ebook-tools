@@ -17,7 +17,10 @@ int main(int argc , char **argv) {
     return 1;
   }
 
-  if (! (epub = epub_open(argv[1], 3)))
+  // FIXME export enum for better debug info
+  // Make debug optional
+  // add -d and -v command params
+  if (! (epub = epub_open(argv[1], 4)))
     quit(1);
   
   epub_dump(epub);
