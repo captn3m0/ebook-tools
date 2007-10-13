@@ -139,13 +139,13 @@ int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr) {
   struct zip_stat *fileStat = malloc(sizeof(struct zip_stat));
 
   if (zip_stat(arch, filename, ZIP_FL_UNCHANGED, fileStat) == -1) {
-    _epub_print_debug(epub, DEBUG_INFO, "%s - %s\n", 
+    _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
     return -1;
   }
   
   if (! (file = zip_fopen_index(arch, fileStat->index, ZIP_FL_NODIR))) {
-    _epub_print_debug(epub, DEBUG_INFO, "%s - %s\n", 
+    _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
     return -1;
   }
@@ -154,7 +154,7 @@ int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr) {
   
   int size;
   if ((size = zip_fread(file, *fileStr, fileStat->size)) == -1) {
-    _epub_print_debug(epub, DEBUG_INFO, "%s - %s\n", 
+    _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
   } else {
     (*fileStr)[size] = 0;
@@ -163,11 +163,16 @@ int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr) {
   free(fileStat);
 
   if (zip_fclose(file) == -1) {
-    _epub_print_debug(epub, DEBUG_INFO, "%s - %s\n", 
+    _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
     return -1;
   }
-
+  
+  if (epub->debug >= DEBUG_VERBOSE) {
+    _epub_print_debug(epub, DEBUG_VERBOSE, "--------- Begin %s", filename);
+    fprintf(stderr, "%s\n", (*fileStr));
+    _epub_print_debug(epub, DEBUG_VERBOSE, "--------- End %s", filename);
+  }
   return size;
 }
 
