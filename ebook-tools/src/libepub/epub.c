@@ -16,6 +16,7 @@ struct epub *epub_open(char *filename, int debug) {
     epub_close(epub);
     return NULL;
   }
+
   char *opfStr = _ocf_root_by_type(epub->ocf, "application/oebps-package+xml");
   if (!opfStr) {
     epub_close(epub);

@@ -41,7 +41,8 @@ struct ocf {
 };
 
 struct opf {
-
+  struct epub *epub;
+  char *name;
 };
 
 struct epuberr {
@@ -84,6 +85,12 @@ int _ocf_parse_mimetype(struct ocf *ocf);
 struct opf *_opf_parse(struct epub *epub, char *opfStr);
 void _opf_dump(struct opf *opf);
 void _opf_close(struct opf *opf);
+
+void _opf_parse_metadata(struct opf *opf, xmlTextReaderPtr reader);
+void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader);
+void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader);
+void _opf_parse_guide(struct opf *opf, xmlTextReaderPtr reader);
+void _opf_parse_tours(struct opf *opf, xmlTextReaderPtr reader);
 
 // epub functions
 struct epub *epub_open(char *filename, int debug);
