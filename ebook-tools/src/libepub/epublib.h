@@ -9,9 +9,12 @@
 #include <zip.h>
 #include <zlib.h>
 
-// for parsing xml
+// For parsing xml
 #include <libxml/xmlreader.h>
 
+// For list stuff
+#include "linklist.h"
+ 
 ///////////////////////////////////////////////////////////
 // OCF definions
 ///////////////////////////////////////////////////////////
@@ -28,7 +31,6 @@
 struct root {
   xmlChar *mediatype; // media type (mime)
   xmlChar *fullpath; // full path to the root
-  struct root *next; // next root in list or NULL
 };
 
 
@@ -36,13 +38,18 @@ struct ocf {
   char *filename; // The ebook filename
   struct zip *arch; // The epub zip
   char *mimetype; // For debugging 
-  struct root *roots; // list of OCF roots
+  listPtr roots; // list of OCF roots
   struct epub *epub; // back pointer
 };
 
+//struct metadata {
+//};
+
 struct opf {
   struct epub *epub;
+  //  struct metadata *meta;
   char *name;
+
 };
 
 struct epuberr {
@@ -97,5 +104,10 @@ struct epub *epub_open(char *filename, int debug);
 void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
 char *epub_last_errStr(struct epub *epub);
 void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
+
+// List operations
+void list_free_root(struct root *data);
+int list_cmp_root_by_mediatype(struct root *root1, struct root *root2);
+void list_dump_root(struct root *root);
 
 #endif /* epublib_h */ 

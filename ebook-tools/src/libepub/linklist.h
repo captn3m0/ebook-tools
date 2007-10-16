@@ -132,6 +132,9 @@ typedef int (* NodeCompareFunc)(void *, void *);
    Results are undefined if one or both pointers are NULL. (note that this
    definition is compatible with strcmp() and related functions) */ 
 
+typedef int (* ListDumpFunc)(void *);
+/* Function to dump the data of a node to the screen */
+
 typedef struct ListNode* listnodePtr;
 typedef struct ListNode
 {  
@@ -345,6 +348,8 @@ int DoubleCompare(double *First, double* Second);
 /* These are suitable NodeCompareFunc functions for three common types of
    nodes.  Provided just to make life a little easier... */
 
+int DumpList(listPtr List, ListDumpFunc DataDump);
+/* Print List data using the DataDump function for Node Data Elements */
 
 #ifdef LINKLIST_TEST
 

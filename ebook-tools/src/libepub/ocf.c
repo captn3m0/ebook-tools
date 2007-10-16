@@ -38,18 +38,16 @@ int _ocf_parse_container(struct ocf *ocf) {
       if (xmlStrcmp(xmlTextReaderConstName(reader), 
                     (xmlChar *)"rootfile") == 0) {
         struct root *newroot = malloc(sizeof(struct root));
-        newroot->next = NULL;
         newroot->mediatype = 
           xmlTextReaderGetAttribute(reader, (xmlChar *)"media-type");
         newroot->fullpath =
           xmlTextReaderGetAttribute(reader, (xmlChar *)"full-path");
+        AddNode(ocf->roots, NewListNode(ocf->roots, newroot));
+  
+
         _epub_print_debug(ocf->epub, DEBUG_INFO, "found root in %s media-type is %s",
                           newroot->fullpath, newroot->mediatype);
-        if (! ocf->roots) {
-          ocf->roots = newroot;
-        } else {
-          ocf->roots->next = newroot;
-        }
+
       }
 
       ret = xmlTextReaderRead(reader);
@@ -73,13 +71,9 @@ void _ocf_dump(struct ocf *ocf) {
   printf("filename:\t %s\n", ocf->filename);
   printf("mimetype:\t %s\n", ocf->mimetype);
   
-  struct root *curr = ocf->roots;
+  struct root *curr = IndexNode(ocf->roots, 1);
 
-  while (curr) {
-    printf("root:\n full path:\t %s\t\n media type:\t %s\n", 
-           curr->fullpath, curr->mediatype);
-    curr = curr->next;
-  }
+  DumpList(ocf->roots, (ListDumpFunc)list_dump_root);
 
 }
 
@@ -106,16 +100,8 @@ void _ocf_close(struct ocf *ocf) {
     }
   }
   
-  struct root *curr = ocf->roots;
-  struct root *prev;
-  
-  while (curr) {
-    free(curr->fullpath);
-    free(curr->mediatype);
-    prev = curr;
-    curr = curr->next;
-    free(prev);
-  }
+
+  FreeList(ocf->roots, (ListFreeFunc)list_free_root);
 
   free(ocf->filename);
   if (ocf->mimetype)
@@ -187,8 +173,8 @@ struct ocf *_ocf_parse(struct epub *epub, char *filename) {
   
   struct ocf *ocf = malloc(sizeof(struct ocf));
   ocf->epub = epub;
-  ocf->roots = NULL;
-
+  ocf->roots = NewListAlloc(LIST, NULL, NULL, 
+                            (NodeCompareFunc)list_cmp_root_by_mediatype);
   ocf->filename = malloc(sizeof(char)*(strlen(filename)+1));
   strcpy(ocf->filename, filename);
   if (! (ocf->arch = _ocf_open(ocf, ocf->filename)))
@@ -211,18 +197,18 @@ struct ocf *_ocf_parse(struct epub *epub, char *filename) {
 }
 
 char *_ocf_root_by_type(struct ocf *ocf, char *type) {
-  struct root *curr = ocf->roots;
-  char *rootXml;
+  struct root look = {(xmlChar *)type, NULL};
+  struct root *res;
+  char *rootXml = NULL;
 
-  while (curr) {
-    if (strcmp(curr->mediatype, type) == 0) {
-      _ocf_get_file(ocf, curr->fullpath, &rootXml);
-      return rootXml;
-    }
-    
-    curr = curr->next;
-  }
-  _epub_print_debug(ocf->epub, DEBUG_WARNING, "type %s for root not found", type);
+  res = FindNode(ocf->roots, &look);
+  if (res)
+    _ocf_get_file(ocf, res->fullpath, &rootXml);
 
-  return NULL;
+
+  if (! rootXml)
+    _epub_print_debug(ocf->epub, DEBUG_WARNING, "type %s for root not found", type);
+
+  return rootXml;
 }
+

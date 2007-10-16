@@ -107,9 +107,11 @@ void *FindNode(listPtr List, void *Data)
     }
   else
     { /* List is a normal list, not a tree, step through it... */
+      
       List->Current = List->Head;
       if (List->Current == NULL)
 	return NULL;
+      
       while ((Compare = (List->compare)(List->Current->Data, Data)) != 0)
 	List->Current = List->Current->Next;
     }
@@ -664,6 +666,28 @@ int DoubleCompare(double *First, double* Second)
        the demonstration/test routines
        
 */
+
+int DumpList(listPtr List, ListDumpFunc DataDump) 
+/* Print List data using the DataDump function for Node Data Elements */
+{
+  int Count;
+  listnodePtr Position;
+
+  if (List == NULL) return LLIST_BADVALUE;
+
+  Position = List->Current;
+  List->Current = List->Head;
+  
+  for (Count = 1; Count <= List->Size; Count++)
+    {
+      DataDump(GetNodeData(List->Current));    
+      NextNode(List);
+    }
+
+  List->Current = Position;
+
+  return LLIST_NOERROR;
+}
 
 #ifdef LINKLIST_TEST
 
