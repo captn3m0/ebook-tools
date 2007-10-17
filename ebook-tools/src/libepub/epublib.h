@@ -67,6 +67,17 @@ struct metadata {
   listPtr rights;
 };
 
+struct manifest {
+    xmlChar *namespace; 
+    xmlChar *modules; 
+    xmlChar *id;
+    xmlChar *href;
+    xmlChar *type;
+    xmlChar *fallback;
+    xmlChar *fbStyle;
+
+};
+    
 struct opf {
   struct epub *epub;
   struct metadata *metadata;
