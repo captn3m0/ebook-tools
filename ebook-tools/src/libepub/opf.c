@@ -72,21 +72,21 @@ void _opf_init_metadata(struct opf *opf) {
 }
 
 void _opf_free_metadata(struct metadata *meta) {
-  FreeList(meta->id, NULL);
-  FreeList(meta->title, NULL);
+  FreeList(meta->id, free);
+  FreeList(meta->title, free);
   FreeList(meta->creator, (ListFreeFunc)_list_free_creator);
   FreeList(meta->contrib, (ListFreeFunc)_list_free_creator);
-  FreeList(meta->subject, NULL);
-  FreeList(meta->publisher, NULL);
-  FreeList(meta->description, NULL);
-  FreeList(meta->date, NULL);
-  FreeList(meta->type, NULL);
-  FreeList(meta->format, NULL);
-  FreeList(meta->source, NULL);
-  FreeList(meta->lang, NULL);
-  FreeList(meta->relation, NULL);
-  FreeList(meta->coverage, NULL);
-  FreeList(meta->rights, NULL);
+  FreeList(meta->subject, free);
+  FreeList(meta->publisher, free);
+  FreeList(meta->description, free);
+  FreeList(meta->date, free);
+  FreeList(meta->type, free);
+  FreeList(meta->format, free);
+  FreeList(meta->source, free);
+  FreeList(meta->lang, free);
+  FreeList(meta->relation, free);
+  FreeList(meta->coverage, free);
+  FreeList(meta->rights, free);
   free(meta);
 }
 
@@ -109,108 +109,85 @@ void _opf_parse_metadata(struct opf *opf, xmlTextReaderPtr reader) {
     }
     
     const xmlChar *local = xmlTextReaderConstLocalName(reader);
+    xmlChar *string = (xmlChar *)xmlTextReaderReadString(reader);
 
     if (xmlStrcmp(local, (xmlChar *)"identifier") == 0) {
-      AddNode(meta->id, 
-              NewListNode(meta->id, xmlTextReaderReadString(reader)));
+        AddNode(meta->id, NewListNode(meta->id, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "identifier is %s", string); 
 
-      _epub_print_debug(opf->epub, DEBUG_INFO, "identifier is %s", 
-                        xmlTextReaderReadString(reader)); 
     } else if (xmlStrcmp(local, (xmlChar *)"title") == 0) {
-      AddNode(meta->title, 
-              NewListNode(meta->title, xmlTextReaderReadString(reader)));
-
-      _epub_print_debug(opf->epub, DEBUG_INFO, "title is %s", 
-                        xmlTextReaderReadString(reader));      
+        AddNode(meta->title, NewListNode(meta->title, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "title is %s", string);
+        
     } else if (xmlStrcmp(local, (xmlChar *)"creator") == 0) {
-      struct creator *new = malloc(sizeof(struct creator));
-      new->name = xmlTextReaderReadString(reader);
-      new->fileAs = 
-        xmlTextReaderGetAttributeNs(reader, (xmlChar *)"file-as", (xmlChar *)"opf");
-      new->role = 
-        xmlTextReaderGetAttributeNs(reader, (xmlChar *)"role", (xmlChar *)"opf");
-      AddNode(meta->creator, NewListNode(meta->creator, new)); 
-
-      _epub_print_debug(opf->epub, DEBUG_INFO, "creator - %s: %s (%s)", 
-                        new->role, new->name, new->fileAs);  
+        struct creator *new = malloc(sizeof(struct creator));
+        new->name = string;
+        new->fileAs = 
+            xmlTextReaderGetAttributeNs(reader, (xmlChar *)"file-as", (xmlChar *)"opf");
+        new->role = 
+            xmlTextReaderGetAttributeNs(reader, (xmlChar *)"role", (xmlChar *)"opf");
+        AddNode(meta->creator, NewListNode(meta->creator, new));       
+        _epub_print_debug(opf->epub, DEBUG_INFO, "creator - %s: %s (%s)", 
+                          new->role, new->name, new->fileAs);
+        
     } else if (xmlStrcmp(local, (xmlChar *)"contributor") == 0) {
       struct creator *new = malloc(sizeof(struct creator));
-      new->name = xmlTextReaderReadString(reader);
+      new->name = string;
       new->fileAs = 
-        xmlTextReaderGetAttributeNs(reader, (xmlChar *)"file-as", (xmlChar *)"opf");
+          xmlTextReaderGetAttributeNs(reader, (xmlChar *)"file-as", (xmlChar *)"opf");
       new->role = 
-        xmlTextReaderGetAttributeNs(reader, (xmlChar *)"role", (xmlChar *)"opf");
-      AddNode(meta->contrib, NewListNode(meta->contrib, new)); 
-      
+          xmlTextReaderGetAttributeNs(reader, (xmlChar *)"role", (xmlChar *)"opf");
+      AddNode(meta->contrib, NewListNode(meta->contrib, new));     
       _epub_print_debug(opf->epub, DEBUG_INFO, "contributor - %s: %s (%s)", 
-                        new->role, new->name, new->fileAs);  
+                        new->role, new->name, new->fileAs);
+      
     } else if (xmlStrcmp(local, (xmlChar *)"subject") == 0) {
-      AddNode(meta->subject, 
-              NewListNode(meta->subject,xmlTextReaderReadString(reader)));
-
-      _epub_print_debug(opf->epub, DEBUG_INFO, "subject is %s", 
-                        xmlTextReaderReadString(reader));      
+        AddNode(meta->subject, NewListNode(meta->subject, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "subject is %s", string);
+        
     } else if (xmlStrcmp(local, (xmlChar *)"publisher") == 0) {
-      AddNode(meta->publisher, 
-              NewListNode(meta->publisher,xmlTextReaderReadString(reader)));
-
-      _epub_print_debug(opf->epub, DEBUG_INFO, "publisher is %s", 
-                        xmlTextReaderReadString(reader));      
+        AddNode(meta->publisher, NewListNode(meta->publisher, string)); 
+        _epub_print_debug(opf->epub, DEBUG_INFO, "publisher is %s", string); 
+        
     } else if (xmlStrcmp(local, (xmlChar *)"description") == 0) {
-      AddNode(meta->description, 
-              NewListNode(meta->description, 
-                          xmlTextReaderReadString(reader)));
-
-      _epub_print_debug(opf->epub, DEBUG_INFO, "description is %s", 
-                        xmlTextReaderReadString(reader));      
+        AddNode(meta->description, NewListNode(meta->description, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "description is %s", string);
+        
     } else if (xmlStrcmp(local, (xmlChar *)"date") == 0) {
-      AddNode(meta->date, 
-              NewListNode(meta->date, xmlTextReaderReadString(reader)));
-
-      _epub_print_debug(opf->epub, DEBUG_INFO, "date is %s", 
-                        xmlTextReaderReadString(reader));      
+        AddNode(meta->date, NewListNode(meta->date, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "date is %s", string); 
+        
     } else if (xmlStrcmp(local, (xmlChar *)"type") == 0) {
-      AddNode(meta->type, 
-              NewListNode(meta->type, xmlTextReaderReadString(reader)));
+        AddNode(meta->type, NewListNode(meta->type, string));       
+        _epub_print_debug(opf->epub, DEBUG_INFO, "type is %s", string);
+        
+    } else if (xmlStrcmp(local, (xmlChar *)"format") == 0) {
+        AddNode(meta->format, NewListNode(meta->format, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "format is %s", string); 
 
-      _epub_print_debug(opf->epub, DEBUG_INFO, "type is %s", 
-                        xmlTextReaderReadString(reader));      
-    }else if (xmlStrcmp(local, (xmlChar *)"format") == 0) {
-      AddNode(meta->format, 
-              NewListNode(meta->format, xmlTextReaderReadString(reader)));
+    } else if (xmlStrcmp(local, (xmlChar *)"source") == 0) {
+        AddNode(meta->source, NewListNode(meta->source, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "source is %s", string); 
 
-      _epub_print_debug(opf->epub, DEBUG_INFO, "format is %s", 
-                        xmlTextReaderReadString(reader));      
-    }else if (xmlStrcmp(local, (xmlChar *)"source") == 0) {
-      AddNode(meta->source, 
-              NewListNode(meta->source, xmlTextReaderReadString(reader)));
-
-      _epub_print_debug(opf->epub, DEBUG_INFO, "source is %s", 
-                        xmlTextReaderReadString(reader));      
     } else if (xmlStrcmp(local, (xmlChar *)"language") == 0) {
-      AddNode(meta->lang, 
-              NewListNode(meta->lang, xmlTextReaderReadString(reader)));
-
-      _epub_print_debug(opf->epub, DEBUG_INFO, "language is %s", 
-                        xmlTextReaderReadString(reader));  
+        AddNode(meta->lang, NewListNode(meta->lang, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "language is %s", string); 
+      
     } else if (xmlStrcmp(local, (xmlChar *)"relation") == 0) {
-      AddNode(meta->relation, 
-              NewListNode(meta->relation, xmlTextReaderReadString(reader)));
+        AddNode(meta->relation, NewListNode(meta->relation, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "relation is %s", string); 
 
-      _epub_print_debug(opf->epub, DEBUG_INFO, "relation is %s", 
-                        xmlTextReaderReadString(reader));      
     } else if (xmlStrcmp(local, (xmlChar *)"coverage") == 0) {
-      AddNode(meta->coverage, 
-              NewListNode(meta->coverage, xmlTextReaderReadString(reader)));
-
-      _epub_print_debug(opf->epub, DEBUG_INFO, "coverage is %s", 
-                        xmlTextReaderReadString(reader));      
-    }else if (xmlStrcmp(local, (xmlChar *)"rights") == 0) {
-      AddNode(meta->rights, 
-              NewListNode(meta->rights, xmlTextReaderReadString(reader)));
-
-      _epub_print_debug(opf->epub, DEBUG_INFO, "rights is %s", 
-                        xmlTextReaderReadString(reader));      
+        AddNode(meta->coverage, NewListNode(meta->coverage, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "coverage is %s", string); 
+    } else if (xmlStrcmp(local, (xmlChar *)"rights") == 0) {
+        AddNode(meta->rights, NewListNode(meta->rights, string));
+        _epub_print_debug(opf->epub, DEBUG_INFO, "rights is %s", string);
+    } else if (string) {
+        if (xmlStrcmp(local, (xmlChar *)"dc-metadata") != 0)
+            _epub_print_debug(opf->epub, DEBUG_INFO,
+                              "unsupported local %s: %s", local, string); 
+        free(string);
     }
 
     ret = xmlTextReaderRead(reader);
@@ -226,9 +203,10 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
   
   if (! toc) 
     _epub_print_debug(opf->epub, DEBUG_WARNING, "toc not found (-)"); 
-  else 
+  else {
     _epub_print_debug(opf->epub, DEBUG_INFO, "toc is %s", toc); 
-  
+    free(toc);
+}	
   ret = xmlTextReaderRead(reader);
   while (ret == 1 && 
          xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"spine")) {
@@ -242,7 +220,13 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
      linear = xmlTextReaderGetAttribute(reader, (xmlChar *)"linear");
      // decide what to do with non linear items
      _epub_print_debug(opf->epub, DEBUG_INFO, "found item %s", idref);
-    
+    if (idref)
+	free(idref);
+
+    if(linear)
+	free(linear);
+
+	
     ret = xmlTextReaderRead(reader);
   }
 }
@@ -269,9 +253,21 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader) {
     fbStyle = xmlTextReaderGetAttribute(reader, (xmlChar *)"fallback-style");
 
     _epub_print_debug(opf->epub, DEBUG_INFO, 
-                      "manifest item %s href %s media-type %s", id, href, type, 
-                      xmlTextReaderReadString(reader));  
+                      "manifest item %s href %s media-type %s", id, href, type);
 
+    if (id)
+        free(id);
+    if (href)
+        free(href);
+    if (type)
+        free(type);
+    if (fallback)
+        free(fallback);
+    if (fbStyle)
+        free(fbStyle);
+            
+            
+            
     ret = xmlTextReaderRead(reader);
   }
 }
