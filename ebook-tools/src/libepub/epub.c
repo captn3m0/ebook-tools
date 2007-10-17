@@ -29,6 +29,9 @@ struct epub *epub_open(char *filename, int debug) {
 }
 
 int epub_close(struct epub *epub) {
+  if (epub->error) 
+    free(epub->error);
+ 
   if (epub->ocf)
     _ocf_close(epub->ocf);
 
@@ -84,7 +87,7 @@ void _epub_print_debug(struct epub *epub, int debug, char *format, ...) {
 
 void epub_dump(struct epub *epub) {
   _ocf_dump(epub->ocf);
-
+  _opf_dump(epub->opf);
 }
 
 void epub_cleanup() {

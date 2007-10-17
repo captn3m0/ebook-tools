@@ -54,6 +54,7 @@ int _ocf_parse_container(struct ocf *ocf) {
     }
 
     xmlFreeTextReader(reader);
+    free(containerXml);
     if (ret != 0) {
       _epub_print_debug(ocf->epub, DEBUG_ERROR, "failed to parse %s\n", name);
       return 0;
@@ -73,7 +74,7 @@ void _ocf_dump(struct ocf *ocf) {
   
   struct root *curr = IndexNode(ocf->roots, 1);
 
-  DumpList(ocf->roots, (ListDumpFunc)list_dump_root);
+  DumpList(ocf->roots, (ListDumpFunc)_list_dump_root);
 
 }
 
@@ -101,7 +102,7 @@ void _ocf_close(struct ocf *ocf) {
   }
   
 
-  FreeList(ocf->roots, (ListFreeFunc)list_free_root);
+  FreeList(ocf->roots, (ListFreeFunc)_list_free_root);
 
   free(ocf->filename);
   if (ocf->mimetype)
@@ -174,7 +175,7 @@ struct ocf *_ocf_parse(struct epub *epub, char *filename) {
   struct ocf *ocf = malloc(sizeof(struct ocf));
   ocf->epub = epub;
   ocf->roots = NewListAlloc(LIST, NULL, NULL, 
-                            (NodeCompareFunc)list_cmp_root_by_mediatype);
+                            (NodeCompareFunc)_list_cmp_root_by_mediatype);
   ocf->filename = malloc(sizeof(char)*(strlen(filename)+1));
   strcpy(ocf->filename, filename);
   if (! (ocf->arch = _ocf_open(ocf, ocf->filename)))

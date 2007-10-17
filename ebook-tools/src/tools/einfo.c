@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <epub.h>
 
-
 void quit(int code) {
   epub_cleanup();
   exit(code);

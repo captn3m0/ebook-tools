@@ -15,19 +15,20 @@ struct opf *_opf_parse(struct epub *epub, char *opfStr) {
    if (reader != NULL) {
     ret = xmlTextReaderRead(reader);
     while (ret == 1) {
-      if (xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"metadata") == 0)
+      const xmlChar *name = xmlTextReaderConstName(reader);
+      if (xmlStrcmp(name, (xmlChar *)"metadata") == 0)
         _opf_parse_metadata(opf, reader);
       else 
-      if (xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"manifest") == 0)
+      if (xmlStrcmp(name, (xmlChar *)"manifest") == 0)
         _opf_parse_manifest(opf, reader);
       else 
-      if (xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"spine") == 0)
+      if (xmlStrcmp(name, (xmlChar *)"spine") == 0)
         _opf_parse_spine(opf, reader);
       else 
-      if (xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"guide") == 0)
+      if (xmlStrcmp(name, (xmlChar *)"guide") == 0)
         _opf_parse_guide(opf, reader);
       else 
-      if (xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"tours") == 0)
+      if (xmlStrcmp(name, (xmlChar *)"tours") == 0)
         _opf_parse_tours(opf, reader);
       
      ret = xmlTextReaderRead(reader);
@@ -47,12 +48,56 @@ struct opf *_opf_parse(struct epub *epub, char *opfStr) {
    
    return opf;
 }
+void _opf_init_metadata(struct opf *opf) {
+  struct metadata *meta = malloc(sizeof(struct metadata));
+
+  meta->id = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);  
+  meta->title = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->creator = NewListAlloc(LIST, NULL, NULL, NULL);
+  meta->contrib = NewListAlloc(LIST, NULL, NULL, NULL);
+  meta->subject = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->publisher = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->description = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->date = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->type = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->format = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->source = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->lang = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->relation = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->coverage = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+  meta->rights = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
+
+
+  opf->metadata = meta;
+}
+
+void _opf_free_metadata(struct metadata *meta) {
+  FreeList(meta->id, NULL);
+  FreeList(meta->title, NULL);
+  FreeList(meta->creator, (ListFreeFunc)_list_free_creator);
+  FreeList(meta->contrib, (ListFreeFunc)_list_free_creator);
+  FreeList(meta->subject, NULL);
+  FreeList(meta->publisher, NULL);
+  FreeList(meta->description, NULL);
+  FreeList(meta->date, NULL);
+  FreeList(meta->type, NULL);
+  FreeList(meta->format, NULL);
+  FreeList(meta->source, NULL);
+  FreeList(meta->lang, NULL);
+  FreeList(meta->relation, NULL);
+  FreeList(meta->coverage, NULL);
+  FreeList(meta->rights, NULL);
+  free(meta);
+}
 
 void _opf_parse_metadata(struct opf *opf, xmlTextReaderPtr reader) {
   _epub_print_debug(opf->epub, DEBUG_INFO, "parsing metadata");
   int ret;
+
   // must have title, identifier and language
-  
+  _opf_init_metadata(opf);
+  struct metadata *meta = opf->metadata;
+
   ret = xmlTextReaderRead(reader);
   while (ret == 1 && 
          xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"metadata")) {
@@ -64,17 +109,109 @@ void _opf_parse_metadata(struct opf *opf, xmlTextReaderPtr reader) {
     }
     
     const xmlChar *local = xmlTextReaderConstLocalName(reader);
-    if (xmlStrcmp(local, (xmlChar *)"title") == 0) {
-      _epub_print_debug(opf->epub, DEBUG_INFO, "title is %s", 
-                        xmlTextReaderReadString(reader));
-    } else if (xmlStrcmp(local, (xmlChar *)"identifier") == 0) {
+
+    if (xmlStrcmp(local, (xmlChar *)"identifier") == 0) {
+      AddNode(meta->id, 
+              NewListNode(meta->id, xmlTextReaderReadString(reader)));
+
       _epub_print_debug(opf->epub, DEBUG_INFO, "identifier is %s", 
-                        xmlTextReaderReadString(reader));  
+                        xmlTextReaderReadString(reader)); 
+    } else if (xmlStrcmp(local, (xmlChar *)"title") == 0) {
+      AddNode(meta->title, 
+              NewListNode(meta->title, xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "title is %s", 
+                        xmlTextReaderReadString(reader));      
+    } else if (xmlStrcmp(local, (xmlChar *)"creator") == 0) {
+      struct creator *new = malloc(sizeof(struct creator));
+      new->name = xmlTextReaderReadString(reader);
+      new->fileAs = 
+        xmlTextReaderGetAttributeNs(reader, (xmlChar *)"file-as", (xmlChar *)"opf");
+      new->role = 
+        xmlTextReaderGetAttributeNs(reader, (xmlChar *)"role", (xmlChar *)"opf");
+      AddNode(meta->creator, NewListNode(meta->creator, new)); 
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "creator - %s: %s (%s)", 
+                        new->role, new->name, new->fileAs);  
+    } else if (xmlStrcmp(local, (xmlChar *)"contributor") == 0) {
+      struct creator *new = malloc(sizeof(struct creator));
+      new->name = xmlTextReaderReadString(reader);
+      new->fileAs = 
+        xmlTextReaderGetAttributeNs(reader, (xmlChar *)"file-as", (xmlChar *)"opf");
+      new->role = 
+        xmlTextReaderGetAttributeNs(reader, (xmlChar *)"role", (xmlChar *)"opf");
+      AddNode(meta->contrib, NewListNode(meta->contrib, new)); 
+      
+      _epub_print_debug(opf->epub, DEBUG_INFO, "contributor - %s: %s (%s)", 
+                        new->role, new->name, new->fileAs);  
+    } else if (xmlStrcmp(local, (xmlChar *)"subject") == 0) {
+      AddNode(meta->subject, 
+              NewListNode(meta->subject,xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "subject is %s", 
+                        xmlTextReaderReadString(reader));      
+    } else if (xmlStrcmp(local, (xmlChar *)"publisher") == 0) {
+      AddNode(meta->publisher, 
+              NewListNode(meta->publisher,xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "publisher is %s", 
+                        xmlTextReaderReadString(reader));      
+    } else if (xmlStrcmp(local, (xmlChar *)"description") == 0) {
+      AddNode(meta->description, 
+              NewListNode(meta->description, 
+                          xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "description is %s", 
+                        xmlTextReaderReadString(reader));      
+    } else if (xmlStrcmp(local, (xmlChar *)"date") == 0) {
+      AddNode(meta->date, 
+              NewListNode(meta->date, xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "date is %s", 
+                        xmlTextReaderReadString(reader));      
+    } else if (xmlStrcmp(local, (xmlChar *)"type") == 0) {
+      AddNode(meta->type, 
+              NewListNode(meta->type, xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "type is %s", 
+                        xmlTextReaderReadString(reader));      
+    }else if (xmlStrcmp(local, (xmlChar *)"format") == 0) {
+      AddNode(meta->format, 
+              NewListNode(meta->format, xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "format is %s", 
+                        xmlTextReaderReadString(reader));      
+    }else if (xmlStrcmp(local, (xmlChar *)"source") == 0) {
+      AddNode(meta->source, 
+              NewListNode(meta->source, xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "source is %s", 
+                        xmlTextReaderReadString(reader));      
     } else if (xmlStrcmp(local, (xmlChar *)"language") == 0) {
+      AddNode(meta->lang, 
+              NewListNode(meta->lang, xmlTextReaderReadString(reader)));
+
       _epub_print_debug(opf->epub, DEBUG_INFO, "language is %s", 
                         xmlTextReaderReadString(reader));  
+    } else if (xmlStrcmp(local, (xmlChar *)"relation") == 0) {
+      AddNode(meta->relation, 
+              NewListNode(meta->relation, xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "relation is %s", 
+                        xmlTextReaderReadString(reader));      
+    } else if (xmlStrcmp(local, (xmlChar *)"coverage") == 0) {
+      AddNode(meta->coverage, 
+              NewListNode(meta->coverage, xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "coverage is %s", 
+                        xmlTextReaderReadString(reader));      
+    }else if (xmlStrcmp(local, (xmlChar *)"rights") == 0) {
+      AddNode(meta->rights, 
+              NewListNode(meta->rights, xmlTextReaderReadString(reader)));
+
+      _epub_print_debug(opf->epub, DEBUG_INFO, "rights is %s", 
+                        xmlTextReaderReadString(reader));      
     }
-    
 
     ret = xmlTextReaderRead(reader);
   }
@@ -88,11 +225,9 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
   toc = xmlTextReaderGetAttribute(reader, (xmlChar *)"toc");
   
   if (! toc) 
-    _epub_print_debug(opf->epub, DEBUG_WARNING, "toc not found (-)", 
-                      xmlTextReaderReadString(reader));  
+    _epub_print_debug(opf->epub, DEBUG_WARNING, "toc not found (-)"); 
   else 
-    _epub_print_debug(opf->epub, DEBUG_INFO, "toc is %s", 
-                      xmlTextReaderReadString(reader));
+    _epub_print_debug(opf->epub, DEBUG_INFO, "toc is %s", toc); 
   
   ret = xmlTextReaderRead(reader);
   while (ret == 1 && 
@@ -168,10 +303,16 @@ void _opf_parse_tours(struct opf *opf, xmlTextReaderPtr reader) {
 }
 
 void _opf_dump(struct opf *opf) {
-  
+  printf("Title(s): ");
+  DumpList(opf->metadata->title, (ListDumpFunc)_list_dump_string);
+  printf("Creator(s): ");
+  DumpList(opf->metadata->creator, (ListDumpFunc)_list_dump_creator);
+  printf("Identifier(s): ");
+  DumpList(opf->metadata->id, (ListDumpFunc)_list_dump_string);
 }
 
 void _opf_close(struct opf *opf) {
-
+  if (opf->metadata)
+    _opf_free_metadata(opf->metadata);
   free(opf);
 }

@@ -14,7 +14,8 @@
 
 // For list stuff
 #include "linklist.h"
- 
+
+
 ///////////////////////////////////////////////////////////
 // OCF definions
 ///////////////////////////////////////////////////////////
@@ -27,7 +28,7 @@
 #define ENCRYPTION_FILENAME "encryption.xml"
 #define RIGHTS_FILENAME "rights.xml"
 
-// A linked list of OCF roots 
+// An OCF root 
 struct root {
   xmlChar *mediatype; // media type (mime)
   xmlChar *fullpath; // full path to the root
@@ -42,12 +43,33 @@ struct ocf {
   struct epub *epub; // back pointer
 };
 
-//struct metadata {
-//};
+struct creator {
+  xmlChar *name;
+  xmlChar *fileAs;
+  xmlChar *role;
+};
+
+struct metadata {
+  listPtr id;
+  listPtr title;
+  listPtr creator;
+  listPtr contrib;
+  listPtr subject;
+  listPtr publisher;
+  listPtr description;
+  listPtr date;
+  listPtr type;
+  listPtr format;
+  listPtr source;
+  listPtr lang;
+  listPtr relation;
+  listPtr coverage;
+  listPtr rights;
+};
 
 struct opf {
   struct epub *epub;
-  //  struct metadata *meta;
+  struct metadata *metadata;
   char *name;
 
 };
@@ -106,8 +128,13 @@ char *epub_last_errStr(struct epub *epub);
 void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
 
 // List operations
-void list_free_root(struct root *data);
-int list_cmp_root_by_mediatype(struct root *root1, struct root *root2);
-void list_dump_root(struct root *root);
+void _list_free_root(struct root *data);
+void _list_free_creator(struct creator *data);
+
+int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2);
+
+void _list_dump_root(struct root *root);
+void _list_dump_string(char *string);
+void _list_dump_creator(struct creator *data);
 
 #endif /* epublib_h */ 
