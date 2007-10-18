@@ -123,9 +123,11 @@ void _opf_parse_metadata(struct opf *opf, xmlTextReaderPtr reader) {
         struct creator *new = malloc(sizeof(struct creator));
         new->name = string;
         new->fileAs = 
-            xmlTextReaderGetAttributeNs(reader, (xmlChar *)"file-as", (xmlChar *)"opf");
+            xmlTextReaderGetAttributeNs(reader, (xmlChar *)"file-as",
+                                        (xmlChar *)"opf");
         new->role = 
-            xmlTextReaderGetAttributeNs(reader, (xmlChar *)"role", (xmlChar *)"opf");
+            xmlTextReaderGetAttributeNs(reader, (xmlChar *)"role",
+                                        (xmlChar *)"opf");
         AddNode(meta->creator, NewListNode(meta->creator, new));       
         _epub_print_debug(opf->epub, DEBUG_INFO, "creator - %s: %s (%s)", 
                           new->role, new->name, new->fileAs);
@@ -134,9 +136,11 @@ void _opf_parse_metadata(struct opf *opf, xmlTextReaderPtr reader) {
       struct creator *new = malloc(sizeof(struct creator));
       new->name = string;
       new->fileAs = 
-          xmlTextReaderGetAttributeNs(reader, (xmlChar *)"file-as", (xmlChar *)"opf");
+          xmlTextReaderGetAttributeNs(reader, (xmlChar *)"file-as",
+                                      (xmlChar *)"opf");
       new->role = 
-          xmlTextReaderGetAttributeNs(reader, (xmlChar *)"role", (xmlChar *)"opf");
+          xmlTextReaderGetAttributeNs(reader, (xmlChar *)"role",
+                                      (xmlChar *)"opf");
       AddNode(meta->contrib, NewListNode(meta->contrib, new));     
       _epub_print_debug(opf->epub, DEBUG_INFO, "contributor - %s: %s (%s)", 
                         new->role, new->name, new->fileAs);
@@ -198,35 +202,47 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
   _epub_print_debug(opf->epub, DEBUG_INFO, "parsing spine");
 
   int ret;
-  xmlChar *toc, *idref, *linear;
-  toc = xmlTextReaderGetAttribute(reader, (xmlChar *)"toc");
+  xmlChar *linear;
   
-  if (! toc) 
+  opf->tocName = xmlTextReaderGetAttribute(reader, (xmlChar *)"toc");
+  
+  if (! opf->tocName) 
     _epub_print_debug(opf->epub, DEBUG_WARNING, "toc not found (-)"); 
   else {
     _epub_print_debug(opf->epub, DEBUG_INFO, "toc is %s", toc); 
-    free(toc);
-}	
+  }
+
+  
   ret = xmlTextReaderRead(reader);
   while (ret == 1 && 
-         xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"spine")) {
+         xmlStrcmp(xmlTextReaderConstName(reader), (xmlChar *)"spine")) {
   
     // ignore non starting tags
     if (xmlTextReaderNodeType(reader) != 1) {
       ret = xmlTextReaderRead(reader);
       continue;
     }
-     idref = xmlTextReaderGetAttribute(reader, (xmlChar *)"idref");
-     linear = xmlTextReaderGetAttribute(reader, (xmlChar *)"linear");
-     // decide what to do with non linear items
-     _epub_print_debug(opf->epub, DEBUG_INFO, "found item %s", idref);
-    if (idref)
-	free(idref);
+
+    struct spine *item = malloc(struct spine);
+    item->idref = xmlTextReaderGetAttribute(reader, (xmlChar *)"idref");
+    linear = xmlTextReaderGetAttribute(reader, (xmlChar *)"linear");
+    if (linear) {
+        if (xmlStrcmp(linear, (xmlChar *)"no") == 0) {
+            item->linear = 0;
+        }
+    } else {
+        item->linear = 1;
+        opf->linearCount++;
+    }
 
     if(linear)
-	free(linear);
-
-	
+        free(linear);
+    
+     AddNode(opf->spine, NewListNode(meta->spine, item));
+     
+    // decide what to do with non linear items
+    _epub_print_debug(opf->epub, DEBUG_INFO, "found item %s", item->idref);
+    
     ret = xmlTextReaderRead(reader);
   }
 }

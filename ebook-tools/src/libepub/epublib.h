@@ -106,12 +106,14 @@ struct spine {
 
 struct opf {
   char *name;
+  xmlChar *tocName;
   struct epub *epub;
   struct metadata *metadata;
   struct toc *toc; // must in opf 2.0
   listPtr manifest;
   listPtr spine;
-  
+  int linearCount;
+    
   // might be NULL
   listPtr guide;
   listPtr tours;
