@@ -68,21 +68,53 @@ struct metadata {
 };
 
 struct manifest {
-    xmlChar *namespace; 
-    xmlChar *modules; 
-    xmlChar *id;
-    xmlChar *href;
-    xmlChar *type;
-    xmlChar *fallback;
-    xmlChar *fbStyle;
+  xmlChar *namespace; 
+  xmlChar *modules; 
+  xmlChar *id;
+  xmlChar *href;
+  xmlChar *type;
+  xmlChar *fallback;
+  xmlChar *fbStyle;
 
 };
     
+struct guide {
+  xmlChar *type;
+  xmlChar *title;
+  xmlChar *href;
+};
+
+struct site {
+  xmlChar *title;
+  xmlChar *href;
+};
+
+struct tour {
+  xmlChar *id;
+  xmlChar *title;
+  listPtr sites;
+};
+
+struct toc {
+  
+};
+
+struct spine {
+  xmlChar *idRef;
+  int linear; //bool
+};
+
 struct opf {
+  char *name;
   struct epub *epub;
   struct metadata *metadata;
-  char *name;
-
+  struct toc *toc; // must in opf 2.0
+  listPtr manifest;
+  listPtr spine;
+  
+  // might be NULL
+  listPtr guide;
+  listPtr tours;
 };
 
 struct epuberr {
