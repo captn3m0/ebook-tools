@@ -96,11 +96,11 @@ struct tour {
 };
 
 struct toc {
-  
+  xmlChar id;
 };
 
 struct spine {
-  xmlChar *idRef;
+  xmlChar *idref;
   int linear; //bool
 };
 
@@ -175,11 +175,19 @@ void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
 // List operations
 void _list_free_root(struct root *data);
 void _list_free_creator(struct creator *data);
+void _list_free_spine(struct spine *spine);
+void _list_free_manifest(struct manifest *manifest);
+void _list_free_guide(struct guide *guide);
+void _list_free_tours(struct tour *tour);
 
 int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2);
 
 void _list_dump_root(struct root *root);
 void _list_dump_string(char *string);
 void _list_dump_creator(struct creator *data);
+void _list_dump_spine(struct spine *spine);
+void _list_dump_spine_linear(struct spine *spine);
+void _list_dump_guide(struct guide *guide);
+void _list_dump_tour(struct tour *tour);
 
 #endif /* epublib_h */ 

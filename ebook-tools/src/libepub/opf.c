@@ -5,7 +5,8 @@ struct opf *_opf_parse(struct epub *epub, char *opfStr) {
   
   struct opf *opf = malloc(sizeof(struct opf));
   opf->epub = epub;
-  
+  opf->guide = NULL;
+  opf->tours = NULL;
   
   xmlTextReaderPtr reader;
   int ret;
@@ -204,12 +205,13 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
   int ret;
   xmlChar *linear;
   
+  opf->spine = NewListAlloc(LIST, NULL, NULL, NULL); 
   opf->tocName = xmlTextReaderGetAttribute(reader, (xmlChar *)"toc");
   
   if (! opf->tocName) 
     _epub_print_debug(opf->epub, DEBUG_WARNING, "toc not found (-)"); 
   else {
-    _epub_print_debug(opf->epub, DEBUG_INFO, "toc is %s", toc); 
+    _epub_print_debug(opf->epub, DEBUG_INFO, "toc is %s", opf->tocName); 
   }
 
   
@@ -223,7 +225,8 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
       continue;
     }
 
-    struct spine *item = malloc(struct spine);
+    struct spine *item = malloc(sizeof(struct spine));
+
     item->idref = xmlTextReaderGetAttribute(reader, (xmlChar *)"idref");
     linear = xmlTextReaderGetAttribute(reader, (xmlChar *)"linear");
     if (linear) {
@@ -238,7 +241,7 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
     if(linear)
         free(linear);
     
-     AddNode(opf->spine, NewListNode(meta->spine, item));
+     AddNode(opf->spine, NewListNode(opf->spine, item));
      
     // decide what to do with non linear items
     _epub_print_debug(opf->epub, DEBUG_INFO, "found item %s", item->idref);
@@ -251,8 +254,10 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader) {
   _epub_print_debug(opf->epub, DEBUG_INFO, "parsing manifest");
 
   int ret;
-  xmlChar *id,*href,*type, *fallback,*fbStyle;
+  opf->manifest = NewListAlloc(LIST, NULL, NULL, NULL);
+
   ret = xmlTextReaderRead(reader);
+
   while (ret == 1 && 
          xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"manifest")) {
  
@@ -261,29 +266,27 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader) {
       ret = xmlTextReaderRead(reader);
       continue;
     }
-    // FIXME: what to do with required-namespace and required-modules 
-    id = xmlTextReaderGetAttribute(reader, (xmlChar *)"id");
-    href = xmlTextReaderGetAttribute(reader, (xmlChar *)"href");
-    type = xmlTextReaderGetAttribute(reader, (xmlChar *)"media-type");
-    fallback = xmlTextReaderGetAttribute(reader, (xmlChar *)"fallback");
-    fbStyle = xmlTextReaderGetAttribute(reader, (xmlChar *)"fallback-style");
 
+    
+    struct manifest *item = malloc(sizeof(struct manifest));
+
+    item->id = xmlTextReaderGetAttribute(reader, (xmlChar *)"id");
+    item->href = xmlTextReaderGetAttribute(reader, (xmlChar *)"href");
+    item->type = xmlTextReaderGetAttribute(reader, (xmlChar *)"media-type");
+    item->fallback = xmlTextReaderGetAttribute(reader, (xmlChar *)"fallback");
+    item->fbStyle = 
+      xmlTextReaderGetAttribute(reader, (xmlChar *)"fallback-style");
+    item->namespace = 
+      xmlTextReaderGetAttribute(reader, (xmlChar *)"required-namespace");
+    item->modules = 
+      xmlTextReaderGetAttribute(reader, (xmlChar *)"required-modules");
+    
     _epub_print_debug(opf->epub, DEBUG_INFO, 
-                      "manifest item %s href %s media-type %s", id, href, type);
+                      "manifest item %s href %s media-type %s", 
+                      item->id, item->href, item->type);
 
-    if (id)
-        free(id);
-    if (href)
-        free(href);
-    if (type)
-        free(type);
-    if (fallback)
-        free(fallback);
-    if (fbStyle)
-        free(fbStyle);
-            
-            
-            
+    AddNode(opf->manifest, NewListNode(opf->manifest, item));
+
     ret = xmlTextReaderRead(reader);
   }
 }
@@ -292,26 +295,89 @@ void _opf_parse_guide(struct opf *opf, xmlTextReaderPtr reader) {
   _epub_print_debug(opf->epub, DEBUG_INFO, "parsing guides");
 
   int ret;
+   opf->guide = NewListAlloc(LIST, NULL, NULL, NULL);
 
   ret = xmlTextReaderRead(reader);
   while (ret == 1 && 
          xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"guides")) {
 
+    // ignore non starting tags
+    if (xmlTextReaderNodeType(reader) != 1) {
+      ret = xmlTextReaderRead(reader);
+      continue;
+    }
+    
+    struct guide *item = malloc(sizeof(struct guide));
+    item->type = xmlTextReaderGetAttribute(reader, (xmlChar *)"type");
+    item->title = xmlTextReaderGetAttribute(reader, (xmlChar *)"href");
+    item->href = xmlTextReaderGetAttribute(reader, (xmlChar *)"title");
+
+    AddNode(opf->guide, NewListNode(opf->guide, item));
     ret = xmlTextReaderRead(reader);
   }
+}
+
+listPtr _opf_parse_tour(struct opf *opf, xmlTextReaderPtr reader) {
+  int ret;
+  listPtr tour = NewListAlloc(LIST, NULL, NULL, NULL);
+
+  ret = xmlTextReaderRead(reader);
+  
+  while (ret == 1 && 
+         xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"tour")) {
+
+    // ignore non starting tags
+    if (xmlTextReaderNodeType(reader) != 1) {
+      ret = xmlTextReaderRead(reader);
+      continue;
+    }
+    
+    struct site *item = malloc(sizeof(struct site));
+    item->title = xmlTextReaderGetAttribute(reader, (xmlChar *)"title");
+    item->href = xmlTextReaderGetAttribute(reader, (xmlChar *)"href");
+    AddNode(tour, NewListNode(tour, item));
+
+    ret = xmlTextReaderRead(reader);
+  }
+
+  return tour;
 }
 
 void _opf_parse_tours(struct opf *opf, xmlTextReaderPtr reader) {
   _epub_print_debug(opf->epub, DEBUG_INFO, "parsing tours");
 
   int ret;
+  opf->tours = NewListAlloc(LIST, NULL, NULL, NULL);
 
   ret = xmlTextReaderRead(reader);
+  xmlChar *local = (xmlChar *)xmlTextReaderConstName(reader);
+  
   while (ret == 1 && 
-         xmlStrcmp(xmlTextReaderConstName(reader),(xmlChar *)"tours")) {
+         xmlStrcmp(local,(xmlChar *)"tours")) {
+    
+    
+    // ignore non starting tags
+    if (xmlTextReaderNodeType(reader) != 1) {
+      ret = xmlTextReaderRead(reader);
+      continue;
+    }
+    
+    if (xmlStrcmp(local, (xmlChar *)"tour") == 0) {
+      struct tour *item = malloc(sizeof(struct tour));
+      
+      item->title = xmlTextReaderGetAttribute(reader, (xmlChar *)"title");
+      item->id = xmlTextReaderGetAttribute(reader, (xmlChar *)"id");
+      item->sites = _opf_parse_tour(opf, reader);
 
+      AddNode(opf->tours, NewListNode(opf->tours, item));
+    }
+    
+    free(local);
+    local = (xmlChar *)xmlTextReaderConstName(reader);
     ret = xmlTextReaderRead(reader);
   }
+
+  free(local);
 }
 
 void _opf_dump(struct opf *opf) {
@@ -321,10 +387,31 @@ void _opf_dump(struct opf *opf) {
   DumpList(opf->metadata->creator, (ListDumpFunc)_list_dump_creator);
   printf("Identifier(s): ");
   DumpList(opf->metadata->id, (ListDumpFunc)_list_dump_string);
+  printf("section order: ");
+  DumpList(opf->spine, (ListDumpFunc)_list_dump_spine);
+  printf("\nlinear reading order: ");
+  DumpList(opf->spine, (ListDumpFunc)_list_dump_spine_linear);
+  printf("\n");
+  if (opf->guide) {
+    printf("guide\n");
+    DumpList(opf->guide, (ListDumpFunc)_list_dump_guide);
+  }
+  if (opf->tours)
+    DumpList(opf->tours, (ListDumpFunc)_list_dump_tour);
 }
 
 void _opf_close(struct opf *opf) {
   if (opf->metadata)
     _opf_free_metadata(opf->metadata);
+  if (opf->spine)
+    FreeList(opf->spine, (ListFreeFunc)_list_free_spine);
+  if (opf->tocName)
+    free(opf->tocName);
+  if (opf->manifest)
+    FreeList(opf->manifest, (ListFreeFunc)_list_free_manifest);
+  if (opf->guide)
+    FreeList(opf->manifest, (ListFreeFunc)_list_free_guide);
+  if (opf->tours)
+    FreeList(opf->manifest, (ListFreeFunc)_list_free_tours);
   free(opf);
 }
