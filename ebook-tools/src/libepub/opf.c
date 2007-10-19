@@ -381,19 +381,20 @@ void _opf_parse_tours(struct opf *opf, xmlTextReaderPtr reader) {
 }
 
 void _opf_dump(struct opf *opf) {
-  printf("Title(s): ");
+  printf("Title(s):\n   ");
   DumpList(opf->metadata->title, (ListDumpFunc)_list_dump_string);
-  printf("Creator(s): ");
+  printf("Creator(s):\n   ");
   DumpList(opf->metadata->creator, (ListDumpFunc)_list_dump_creator);
-  printf("Identifier(s): ");
+  printf("Identifier(s):\n   ");
   DumpList(opf->metadata->id, (ListDumpFunc)_list_dump_string);
-  printf("section order: ");
+  printf("Section order:\n   ");
   DumpList(opf->spine, (ListDumpFunc)_list_dump_spine);
-  printf("\nlinear reading order: ");
+  printf("\n");
+  printf("Linear reading order:\n   ");
   DumpList(opf->spine, (ListDumpFunc)_list_dump_spine_linear);
   printf("\n");
   if (opf->guide) {
-    printf("guide\n");
+    printf("Guide\n");
     DumpList(opf->guide, (ListDumpFunc)_list_dump_guide);
   }
   if (opf->tours)
