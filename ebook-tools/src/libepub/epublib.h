@@ -186,7 +186,6 @@ void _list_dump_root(struct root *root);
 void _list_dump_string(char *string);
 void _list_dump_creator(struct creator *data);
 void _list_dump_spine(struct spine *spine);
-void _list_dump_spine_linear(struct spine *spine);
 void _list_dump_guide(struct guide *guide);
 void _list_dump_tour(struct tour *tour);
 

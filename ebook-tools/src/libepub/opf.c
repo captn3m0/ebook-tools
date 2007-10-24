@@ -45,8 +45,6 @@ struct opf *_opf_parse(struct epub *epub, char *opfStr) {
      return NULL;
    }
    
-   //FIXME: _opf_parse_toc(opf->toc);
-   
    return opf;
 }
 void _opf_init_metadata(struct opf *opf) {
@@ -389,9 +387,6 @@ void _opf_dump(struct opf *opf) {
   DumpList(opf->metadata->id, (ListDumpFunc)_list_dump_string);
   printf("Section order:\n   ");
   DumpList(opf->spine, (ListDumpFunc)_list_dump_spine);
-  printf("\n");
-  printf("Linear reading order:\n   ");
-  DumpList(opf->spine, (ListDumpFunc)_list_dump_spine_linear);
   printf("\n");
   if (opf->guide) {
     printf("Guide\n");

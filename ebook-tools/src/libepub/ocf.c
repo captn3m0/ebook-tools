@@ -69,11 +69,12 @@ int _ocf_parse_container(struct ocf *ocf) {
 }
 
 void _ocf_dump(struct ocf *ocf) {  
-  printf("filename:\t %s\n", ocf->filename);
-  printf("mimetype:\t %s\n", ocf->mimetype);
+  printf("Filename:\t %s\n", ocf->filename);
+  printf("Mimetype:\t %s\n", ocf->mimetype);
   
   struct root *curr = IndexNode(ocf->roots, 1);
 
+  printf("Root(s):\n");
   DumpList(ocf->roots, (ListDumpFunc)_list_dump_root);
 
 }

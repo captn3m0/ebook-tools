@@ -82,11 +82,14 @@ int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2) {
 
 // Print root 
 void _list_dump_root(struct root *root) {
-  printf("root -- full path: %s media-type: %s\n", 
+  printf("\t%s (%s)\n", 
          root->fullpath, root->mediatype);
 }
 void _list_dump_spine(struct spine *spine) {
-  printf("%s ", spine->idref);
+  printf("%s", spine->idref);
+  if (spine->linear) 
+    printf("(L)");
+  printf(" ");
 }
 
 void _list_dump_spine_linear(struct spine *spine) {
