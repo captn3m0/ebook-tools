@@ -70,7 +70,7 @@ int _ocf_parse_container(struct ocf *ocf) {
 
 void _ocf_dump(struct ocf *ocf) {  
   printf("Filename:\t %s\n", ocf->filename);
-  printf("Mimetype:\t %s\n", ocf->mimetype);
+  //  printf("Mimetype:\t %s\n", ocf->mimetype);
   
   struct root *curr = IndexNode(ocf->roots, 1);
 
