@@ -82,7 +82,7 @@ int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2) {
 
 // Print root 
 void _list_dump_root(struct root *root) {
-  printf("\t%s (%s)\n", 
+  printf("   %s (%s)\n", 
          root->fullpath, root->mediatype);
 }
 void _list_dump_spine(struct spine *spine) {
