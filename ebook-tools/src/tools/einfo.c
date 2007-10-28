@@ -19,7 +19,7 @@ void usage(int code) {
     fprintf(stderr, "   -pp\t Print the whole book\n");
     fprintf(stderr, "   -t <tour id>\t prints the tour <tour id>\n");
     fprintf(stderr, "   -g Print the guide file as html (if exists)");
-    fprintf(stderr, "   -g Print the toc ncx file as html (if exists)");
+    fprintf(stderr, "   -n Print the toc ncx file as html (if exists)");
 
     exit(code);
 }
