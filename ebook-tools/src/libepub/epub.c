@@ -85,6 +85,11 @@ void _epub_print_debug(struct epub *epub, int debug, char *format, ...) {
   va_end(ap);
 }
 
+int epub_get_ocf_file(struct epub *epub, char *filename, char **data) {
+  return _ocf_get_file(epub->ocf, filename, data);
+
+}
+
 void epub_dump(struct epub *epub) {
   _ocf_dump(epub->ocf);
   _opf_dump(epub->opf);

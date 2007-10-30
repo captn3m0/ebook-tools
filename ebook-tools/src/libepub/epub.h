@@ -9,10 +9,7 @@
 #include <libxml/xmlreader.h>
 
 /** \struct epub is a private struct containting information about the epub file */
-typedef struct epub epub;
-
-typedef struct {
-} epub_info;
+struct epub;
 
 /** 
     This function accepts an epub filename. It then parses its information and
@@ -23,14 +20,17 @@ typedef struct {
     @return epub struct with the information of the file or NULL on error
     
  */
-epub *epub_open(char *filename, int debug);
+struct epub *epub_open(char *filename, int debug);
 
 /**
    This function sets the debug level to the given level.
 
    @param debug is the debug level (0=none, 1=errors, 2=warnings, 3=info)
  */
-void epub_set_debug(epub *epub, int debug);
+void epub_set_debug(struct epub *epub, int debug);
+
+
+int epub_get_ocf_file(struct epub *epub, char *filename, char **data);
 
 /** 
     This function closes a given epub. It also frees the epub struct.
@@ -38,10 +38,14 @@ void epub_set_debug(epub *epub, int debug);
 
     @param epub the struct of the epub to close.
 */
-int  epub_close(epub *epub);
+int epub_close(struct epub *epub);
 
+/** 
+   Debugging function dumping various file information.
 
-void epub_dump(epub *epub);
+   @param epub the struct of the epub to close.
+*/
+void epub_dump(struct epub *epub);
 
 /**
    Cleans up after the library. Call this when you are done with the library. 

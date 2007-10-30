@@ -95,8 +95,19 @@ struct tour {
   listPtr sites;
 };
 
+struct tocItem {
+  xmlChar *id;
+  xmlChar *label;
+  xmlChar *src;
+  int level;
+  int playOrder;
+};
+
 struct toc {
-  xmlChar id;
+  listPtr navMap; 
+  listPtr pageList;
+  listPtr navList;
+  listPtr playOrder;
 };
 
 struct spine {

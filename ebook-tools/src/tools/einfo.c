@@ -25,7 +25,7 @@ void usage(int code) {
 }
 
 int main(int argc , char **argv) {
-  epub *epub;
+  struct epub *epub;
   char *filename = NULL;
   char *tourId = NULL;
   int verbose = 0, print = 0, debug = 0, ncx = 0, guide = 0;
@@ -88,11 +88,7 @@ int main(int argc , char **argv) {
   
   epub_dump(epub);
 
-  /*  if (print)
-      add linear reading -pl?
-      add tour reading -pt?
-      add full dump reading -pa?
-   */
+
   if (! epub_close(epub)) {
     quit(1);
   }
