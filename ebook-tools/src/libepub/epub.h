@@ -1,6 +1,7 @@
 #ifndef EPUB_H
 #define EPUB_H 1
 
+
 // For opening the zip file
 #include <zip.h>
 #include <zlib.h>
@@ -20,6 +21,10 @@ struct epub;
     @return epub struct with the information of the file or NULL on error
     
  */
+#ifdef __cplusplus
+extern "C" {
+#endif // c++
+
 struct epub *epub_open(const char *filename, int debug);
 
 /**
@@ -52,5 +57,8 @@ void epub_dump(struct epub *epub);
  */
 void epub_cleanup();
 
+#ifdef __cplusplus
+}
+#endif // c++
 
 #endif // EPUB_H
