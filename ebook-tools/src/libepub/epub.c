@@ -1,7 +1,7 @@
 #include "epublib.h"
 #include <stdarg.h>
 
-struct epub *epub_open(char *filename, int debug) {
+struct epub *epub_open(const char *filename, int debug) {
   struct epub *epub = malloc(sizeof(struct epub));
   epub->ocf = NULL;
   epub->opf = NULL;

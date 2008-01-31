@@ -55,8 +55,8 @@ void _list_free_tours(struct tour *tour) {
 
 void _list_free_manifest(struct manifest *manifest) {
 
-  if (manifest->namespace)
-    free(manifest->namespace);
+  if (manifest->nspace)
+    free(manifest->nspace);
   if (manifest->modules)
     free(manifest->modules);
   if (manifest->id)

@@ -79,7 +79,7 @@ void _ocf_dump(struct ocf *ocf) {
 
 }
 
-struct zip *_ocf_open(struct ocf *ocf, char *filename) {
+struct zip *_ocf_open(struct ocf *ocf, const char *filename) {
 
   int err;
   char errStr[8192];
@@ -105,7 +105,7 @@ void _ocf_close(struct ocf *ocf) {
 
   FreeList(ocf->roots, (ListFreeFunc)_list_free_root);
 
-  free(ocf->filename);
+  //  free(ocf->filename);
   if (ocf->mimetype)
     free(ocf->mimetype);
   free(ocf);
@@ -164,13 +164,13 @@ int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr) {
   return size;
 }
 
-void _ocf_not_supported(struct ocf *ocf, char *filename) {
+void _ocf_not_supported(struct ocf *ocf, const char *filename) {
   if (_ocf_check_file(ocf, filename) > -1) 
     _epub_print_debug(ocf->epub, DEBUG_WARNING, 
                       "file %s exists but is not supported by this version", filename);
 }
 
-struct ocf *_ocf_parse(struct epub *epub, char *filename) {
+struct ocf *_ocf_parse(struct epub *epub, const char *filename) {
   _epub_print_debug(epub, DEBUG_INFO, "building ocf struct");
   
   struct ocf *ocf = malloc(sizeof(struct ocf));
@@ -178,7 +178,8 @@ struct ocf *_ocf_parse(struct epub *epub, char *filename) {
   ocf->roots = NewListAlloc(LIST, NULL, NULL, 
                             (NodeCompareFunc)_list_cmp_root_by_mediatype);
   ocf->filename = malloc(sizeof(char)*(strlen(filename)+1));
-  strcpy(ocf->filename, filename);
+  //  strcpy(ocf->filename, filename);
+  ocf->filename = filename;
   if (! (ocf->arch = _ocf_open(ocf, ocf->filename)))
     return NULL;
   

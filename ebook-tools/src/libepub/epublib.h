@@ -36,7 +36,7 @@ struct root {
 
 
 struct ocf {
-  char *filename; // The ebook filename
+  const char *filename; // The ebook filename
   struct zip *arch; // The epub zip
   char *mimetype; // For debugging 
   listPtr roots; // list of OCF roots
@@ -68,7 +68,7 @@ struct metadata {
 };
 
 struct manifest {
-  xmlChar *namespace; 
+  xmlChar *nspace; 
   xmlChar *modules; 
   xmlChar *id;
   xmlChar *href;
@@ -154,10 +154,10 @@ enum {
 
 
 // Ocf functions
-struct ocf *_ocf_parse(struct epub *epub, char *filename);
+struct ocf *_ocf_parse(struct epub *epub, const char *filename);
 void _ocf_dump(struct ocf *ocf);
 void _ocf_close(struct ocf *ocf);
-struct zip *_ocf_open(struct ocf *ocf, char *fileName);
+struct zip *_ocf_open(struct ocf *ocf, const char *fileName);
 int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr);
 int _ocf_check_file(struct ocf *ocf, const char *filename);
 char *_ocf_root_by_type(struct ocf *ocf, char *type);
@@ -178,7 +178,7 @@ void _opf_parse_guide(struct opf *opf, xmlTextReaderPtr reader);
 void _opf_parse_tours(struct opf *opf, xmlTextReaderPtr reader);
 
 // epub functions
-struct epub *epub_open(char *filename, int debug);
+struct epub *epub_open(const char *filename, int debug);
 void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
 char *epub_last_errStr(struct epub *epub);
 void _epub_print_debug(struct epub *epub, int debug, char *format, ...);

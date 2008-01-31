@@ -274,7 +274,7 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader) {
     item->fallback = xmlTextReaderGetAttribute(reader, (xmlChar *)"fallback");
     item->fbStyle = 
       xmlTextReaderGetAttribute(reader, (xmlChar *)"fallback-style");
-    item->namespace = 
+    item->nspace = 
       xmlTextReaderGetAttribute(reader, (xmlChar *)"required-namespace");
     item->modules = 
       xmlTextReaderGetAttribute(reader, (xmlChar *)"required-modules");

@@ -20,7 +20,7 @@ struct epub;
     @return epub struct with the information of the file or NULL on error
     
  */
-struct epub *epub_open(char *filename, int debug);
+struct epub *epub_open(const char *filename, int debug);
 
 /**
    This function sets the debug level to the given level.
@@ -30,7 +30,7 @@ struct epub *epub_open(char *filename, int debug);
 void epub_set_debug(struct epub *epub, int debug);
 
 
-int epub_get_ocf_file(struct epub *epub, char *filename, char **data);
+int epub_get_ocf_file(struct epub *epub, const char *filename, char **data);
 
 /** 
     This function closes a given epub. It also frees the epub struct.
