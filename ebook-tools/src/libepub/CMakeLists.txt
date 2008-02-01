@@ -3,3 +3,5 @@ link_directories (${EBOOK-TOOLS_BINARY_DIR}/libs ${LIBZIP_LIBRARY} ${LIBXML2_LIB
 add_library (epub epub.c ocf.c opf.c linklist.c list.c)
 target_link_libraries (epub ${LIBZIP_LIBRARY} ${LIBXML2_LIBRARIES})
 
+install ( TARGETS epub DESTINATION lib )
+install ( FILES epub.h epublib.h linklist.h DESTINATION include )
