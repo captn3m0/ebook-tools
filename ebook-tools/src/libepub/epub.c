@@ -28,6 +28,110 @@ struct epub *epub_open(const char *filename, int debug) {
   return epub;
 }
 
+xmlChar *_getXmlStr(void *str) {
+
+  return xmlStrdup((xmlChar *)str);
+}
+
+xmlChar *_getRoleStr(void *creator) {
+  struct creator *data = (struct creator *)creator;
+  xmlChar buff[10000];
+  xmlStrPrintf(buff, 10000, "%s: %s(%s)", 
+               ((data->role)?data->role:(xmlChar *)"Author"), 
+               data->name, ((data->fileAs)?data->fileAs:data->name));
+  
+  return xmlStrdup(buff);
+}
+
+xmlChar **epub_get_metadata(struct epub *epub, enum epub_metadata type, 
+                            int *size) {
+  xmlChar **data = NULL;
+  listPtr list;
+  xmlChar *(*getStr)(void *);
+  int i;
+
+  switch(type) {
+  case EPUB_ID:
+    list = epub->opf->metadata->id;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_TITLE:
+    list = epub->opf->metadata->title;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_SUBJECT:
+    list = epub->opf->metadata->subject;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_PUBLISHER:
+    list = epub->opf->metadata->publisher;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_DESCRIPTION:
+    list = epub->opf->metadata->description;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_DATE:
+    list = epub->opf->metadata->date;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_TYPE:
+    list = epub->opf->metadata->type;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_FORMAT:
+    list = epub->opf->metadata->format;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_SOURCE:
+    list = epub->opf->metadata->source;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_LANG:
+    list = epub->opf->metadata->lang;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_RELATION:
+    list = epub->opf->metadata->relation;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_COVERAGE:
+    list = epub->opf->metadata->coverage;
+    getStr = _getXmlStr;
+    break;
+  case EPUB_RIGHTS:
+    list = epub->opf->metadata->rights;
+    getStr = _getXmlStr;
+    break;
+
+  case EPUB_CREATOR:
+    list = epub->opf->metadata->creator;
+    getStr = _getRoleStr;
+    break;
+  case EPUB_CONTRIB:
+    list = epub->opf->metadata->contrib;
+    getStr = _getRoleStr;
+    break;
+  }
+
+  *size = list->Size;
+  if (! list->Size)
+    return NULL;
+
+  data = malloc(list->Size * sizeof(xmlChar *));
+
+  data[0] = getStr(GetNode(list));
+  for (i=1;i<list->Size;i++) {
+    data[i] = getStr(NextNode(list));
+  }
+
+  return data;
+}
+
+struct eiterator *epub_get_iterator(struct epub *epub, enum eiterator_type type
+                                    , char *name, int opt) {
+}
+
 int epub_close(struct epub *epub) {
   if (epub->error) 
     free(epub->error);

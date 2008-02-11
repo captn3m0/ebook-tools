@@ -14,7 +14,7 @@
 
 // For list stuff
 #include "linklist.h"
-
+#include "epub_shared.h"
 
 ///////////////////////////////////////////////////////////
 // OCF definions
