@@ -128,8 +128,74 @@ xmlChar **epub_get_metadata(struct epub *epub, enum epub_metadata type,
   return data;
 }
 
-struct eiterator *epub_get_iterator(struct epub *epub, enum eiterator_type type
-                                    , char *name, int opt) {
+struct eiterator *epub_get_iterator(struct epub *epub, 
+                                    enum eiterator_type type, int opt) {
+
+  struct eiterator *it = malloc(sizeof(struct eiterator));
+  
+  it->type = type;
+  it->epub = epub;
+  it->opt = opt;
+  it->cache = NULL;
+
+  switch (type) {
+  case EITERATOR_NONLINEAR:
+    it->curr = epub->opf->spine->Head;
+    break;
+  case EITERATOR_LINEAR:
+    
+    break;
+  }
+
+
+  return it;
+}
+char *epub_it_get_curr(struct eiterator *it) {
+
+  if (!it->curr)
+    return NULL;
+
+  if (!it->cache) {
+    void *data;
+       
+    switch (it->type) {
+      struct manifest *tmp;
+      
+    case EITERATOR_NONLINEAR:
+      data = GetNodeData(it->curr);
+      tmp = _opf_manifest_get_by_id(it->epub->opf, 
+                                    ((struct spine *)data)->idref);
+      _ocf_get_data_file(it->epub->ocf, tmp->href, &(it->cache));
+      break;
+
+    case EITERATOR_LINEAR:
+      break;
+    }
+  }
+  
+  return it->cache;
+}
+char *epub_it_get_next(struct eiterator *it) {
+  
+  if (it->cache) {
+    free(it->cache);
+    it->cache = NULL;
+  }
+
+  if (!it->curr)
+    return NULL;
+
+  switch (it->type) {
+   
+  case EITERATOR_NONLINEAR:
+    it->curr = it->curr->Next;
+    break;
+
+  case EITERATOR_LINEAR:
+    break;
+  }
+  
+  return epub_it_get_curr(it);
 }
 
 int epub_close(struct epub *epub) {

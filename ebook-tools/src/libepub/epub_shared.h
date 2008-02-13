@@ -24,4 +24,5 @@ enum eiterator_type {
   EITERATOR_NONLINEAR,
 
 };
+
 #endif

@@ -80,6 +80,10 @@ int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2) {
   return strcmp(root1->mediatype, root2->mediatype);
 }
 
+int _list_cmp_manifest_by_id(struct manifest *m1, struct manifest *m2) {
+  return strcmp(m1->id, m2->id);
+}
+
 // Print root 
 void _list_dump_root(struct root *root) {
   printf("   %s (%s)\n", 

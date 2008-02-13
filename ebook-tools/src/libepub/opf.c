@@ -252,7 +252,8 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader) {
   _epub_print_debug(opf->epub, DEBUG_INFO, "parsing manifest");
 
   int ret;
-  opf->manifest = NewListAlloc(LIST, NULL, NULL, NULL);
+  opf->manifest = NewListAlloc(LIST, NULL, NULL, 
+                               (NodeCompareFunc)_list_cmp_manifest_by_id );
 
   ret = xmlTextReaderRead(reader);
 
@@ -287,6 +288,14 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader) {
 
     ret = xmlTextReaderRead(reader);
   }
+}
+
+struct manifest *_opf_manifest_get_by_id(struct opf *opf, xmlChar* id) {
+  struct manifest data;
+  data.id = id;
+  
+  return FindNode(opf->manifest, &data);
+  
 }
 
 void _opf_parse_guide(struct opf *opf, xmlTextReaderPtr reader) {

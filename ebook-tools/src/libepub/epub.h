@@ -60,9 +60,12 @@ extern "C" {
                               int *size);
 
   struct eiterator *epub_get_iterator(struct epub *epub, 
-                                      enum eiterator_type type, 
-                                      char *name, int opt);
-  
+                                      enum eiterator_type type, int opt);
+
+  char *epub_it_get_next(struct eiterator *it);
+
+  char *epub_it_get_curr(struct eiterator *it);
+
   /**
      Cleans up after the library. Call this when you are done with the library. 
   */

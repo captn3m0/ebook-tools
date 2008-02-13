@@ -164,6 +164,7 @@ int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr) {
   return size;
 }
 
+
 void _ocf_not_supported(struct ocf *ocf, const char *filename) {
   if (_ocf_check_file(ocf, filename) > -1) 
     _epub_print_debug(ocf->epub, DEBUG_WARNING, 
@@ -197,6 +198,17 @@ struct ocf *_ocf_parse(struct epub *epub, const char *filename) {
    _ocf_not_supported(ocf, METAINFO_DIR "/" RIGHTS_FILENAME);
 
   return ocf;
+}
+
+int _ocf_get_data_file(struct ocf *ocf, const char *filename, char **fileStr) {
+  int size;
+  char *fullname = malloc((strlen(filename)+sizeof("OEBPS/")+1)*sizeof(char));
+  strcpy(fullname, "OEBPS/");
+  strcat(fullname, filename);
+  size = _ocf_get_file(ocf, fullname, fileStr);
+  free(fullname);
+
+  return size;
 }
 
 char *_ocf_root_by_type(struct ocf *ocf, char *type) {

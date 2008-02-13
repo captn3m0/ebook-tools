@@ -152,6 +152,14 @@ enum {
   DEBUG_VERBOSE
 };
 
+struct eiterator {
+  enum eiterator_type type;
+  struct epub *epub;
+  int opt;
+  listnodePtr curr;
+  char *cache;
+};
+
 
 // Ocf functions
 struct ocf *_ocf_parse(struct epub *epub, const char *filename);
@@ -159,6 +167,7 @@ void _ocf_dump(struct ocf *ocf);
 void _ocf_close(struct ocf *ocf);
 struct zip *_ocf_open(struct ocf *ocf, const char *fileName);
 int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr);
+int _ocf_get_data_file(struct ocf *ocf, const char *filename, char **fileStr);
 int _ocf_check_file(struct ocf *ocf, const char *filename);
 char *_ocf_root_by_type(struct ocf *ocf, char *type);
 
@@ -177,6 +186,8 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader);
 void _opf_parse_guide(struct opf *opf, xmlTextReaderPtr reader);
 void _opf_parse_tours(struct opf *opf, xmlTextReaderPtr reader);
 
+struct manifest *_opf_manifest_get_by_id(struct opf *opf, xmlChar* id);
+
 // epub functions
 struct epub *epub_open(const char *filename, int debug);
 void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
@@ -192,6 +203,7 @@ void _list_free_guide(struct guide *guide);
 void _list_free_tours(struct tour *tour);
 
 int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2);
+int _list_cmp_manifest_by_id(struct manifest *m1, struct manifest *m2);
 
 void _list_dump_root(struct root *root);
 void _list_dump_string(char *string);
