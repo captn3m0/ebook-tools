@@ -1,11 +1,6 @@
 #ifndef EPUB_H
 #define EPUB_H 1
 
-
-// For opening the zip file
-#include <zip.h>
-#include <zlib.h>
-
 // for parsing xml
 #include <libxml/xmlreader.h>
 
