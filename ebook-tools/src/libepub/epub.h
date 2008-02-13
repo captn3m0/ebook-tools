@@ -1,9 +1,6 @@
 #ifndef EPUB_H
 #define EPUB_H 1
 
-// for parsing xml
-#include <libxml/xmlreader.h>
-
 #include <epub_shared.h>
 /** \struct epub is a private struct containting information about the epub file */
 struct epub;
@@ -51,8 +48,8 @@ extern "C" {
   */
   void epub_dump(struct epub *epub);
   
-  xmlChar **epub_get_metadata(struct epub *epub, enum epub_metadata type,
-                              int *size);
+  unsigned char **epub_get_metadata(struct epub *epub, enum epub_metadata type,
+                                    int *size);
 
   struct eiterator *epub_get_iterator(struct epub *epub, 
                                       enum eiterator_type type, int opt);
