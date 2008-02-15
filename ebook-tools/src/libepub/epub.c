@@ -1,3 +1,4 @@
+#include "epub.h"
 #include "epublib.h"
 #include <stdarg.h>
 
@@ -36,7 +37,7 @@ xmlChar *_getXmlStr(void *str) {
 xmlChar *_getRoleStr(void *creator) {
   struct creator *data = (struct creator *)creator;
   xmlChar buff[10000];
-  xmlStrPrintf(buff, 10000, "%s: %s(%s)", 
+  xmlStrPrintf(buff, 10000, (xmlChar *)"%s: %s(%s)", 
                ((data->role)?data->role:(xmlChar *)"Author"), 
                data->name, ((data->fileAs)?data->fileAs:data->name));
   
@@ -128,6 +129,36 @@ xmlChar **epub_get_metadata(struct epub *epub, enum epub_metadata type,
   return data;
 }
 
+// returns the next node that the iterator should return
+// if init also check if the current node is good
+// if linear is 0 return non linear else return linear
+listnodePtr _get_spine_it_next(listnodePtr curr, int linear, int init) {
+  struct spine *node; 
+
+  if (! curr)
+    return NULL;
+  
+  if ( ! init) {
+    curr = curr->Next;
+  }
+
+  node = (struct spine *)GetNodeData(curr);
+  
+  while(curr) {
+    if (! node)
+      return NULL;
+    
+    node = (struct spine *)GetNodeData(curr);
+    
+    if (node->linear == linear)
+      return curr;
+    
+    curr = curr->Next;
+  }
+
+  return NULL;
+}
+
 struct eiterator *epub_get_iterator(struct epub *epub, 
                                     enum eiterator_type type, int opt) {
 
@@ -139,17 +170,28 @@ struct eiterator *epub_get_iterator(struct epub *epub,
   it->cache = NULL;
 
   switch (type) {
-  case EITERATOR_NONLINEAR:
+  case EINTERTOR_SPINE:
     it->curr = epub->opf->spine->Head;
     break;
+  case EITERATOR_NONLINEAR:
+    it->curr = _get_spine_it_next(epub->opf->spine->Head, 0, 1); 
+    break;
   case EITERATOR_LINEAR:
-    
+    it->curr = _get_spine_it_next(epub->opf->spine->Head, 1, 1); 
     break;
   }
 
 
   return it;
 }
+
+void epub_free_iterator(struct eiterator *it) {
+  if (it->cache)
+    free(it->cache);
+
+  free(it);
+}
+
 char *epub_it_get_curr(struct eiterator *it) {
 
   if (!it->curr)
@@ -160,15 +202,13 @@ char *epub_it_get_curr(struct eiterator *it) {
        
     switch (it->type) {
       struct manifest *tmp;
-      
+    case EINTERTOR_SPINE:
     case EITERATOR_NONLINEAR:
+    case EITERATOR_LINEAR:
       data = GetNodeData(it->curr);
       tmp = _opf_manifest_get_by_id(it->epub->opf, 
                                     ((struct spine *)data)->idref);
-      _ocf_get_data_file(it->epub->ocf, tmp->href, &(it->cache));
-      break;
-
-    case EITERATOR_LINEAR:
+      _ocf_get_data_file(it->epub->ocf, (char *)tmp->href, &(it->cache));
       break;
     }
   }
@@ -186,12 +226,17 @@ char *epub_it_get_next(struct eiterator *it) {
     return NULL;
 
   switch (it->type) {
-   
-  case EITERATOR_NONLINEAR:
+
+  case EINTERTOR_SPINE:
     it->curr = it->curr->Next;
+    break;
+    
+  case EITERATOR_NONLINEAR:
+    it->curr = _get_spine_it_next(it->curr, 0, 0); 
     break;
 
   case EITERATOR_LINEAR:
+    it->curr = _get_spine_it_next(it->curr, 1, 0); 
     break;
   }
   
@@ -255,7 +300,7 @@ void _epub_print_debug(struct epub *epub, int debug, char *format, ...) {
   va_end(ap);
 }
 
-int epub_get_ocf_file(struct epub *epub, char *filename, char **data) {
+int epub_get_ocf_file(struct epub *epub, const char *filename, char **data) {
   return _ocf_get_file(epub->ocf, filename, data);
 
 }

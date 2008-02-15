@@ -6,6 +6,7 @@
 */
 
 #include "linklist.h"
+#include <string.h>
 
 listPtr NewListAlloc(int ListType, ListAlloc Lalloc, ListFreeFunc Lfree, 
 		     NodeCompareFunc Cfunc)
@@ -125,7 +126,6 @@ void *FindNode(listPtr List, void *Data)
 
 void *BTFind(listPtr List, void *Data)
 {
-  listnodePtr Par, Grand;
   int Compare;
 
   if ((List == NULL) || (List->compare == NULL))
@@ -270,22 +270,6 @@ int TailList(listPtr List, listnodePtr Node)
   return LLIST_NOERROR;
 } /* TailList() */
   
-int DelNode(listPtr List)
-{
-  if (List == NULL) return LLIST_NULL;
-
-  switch (List->Flags & LISTDELMASK) 
-    {
-       case LISTDELCURR: return RemoveList(List); break;
-       case LISTDELHEAD: return DelHeadList(List); break;
-       case LISTDELTAIL: return DelTailList(List); break;
-       case LISTDELSPLAY: return SplayRemoveList(List); break;
-      default: return RemoveList(List); break; 
-    }
-
-  return LLIST_ERROR;
-} /* DelNode() */
-
 int SplayRemoveList(listPtr List)
 {
   listnodePtr DelNode;
@@ -316,6 +300,22 @@ int SplayRemoveList(listPtr List)
   List->Size--;
   return LLIST_NOERROR;
 } /* SplayRemoveList() */
+
+int DelNode(listPtr List)
+{
+  if (List == NULL) return LLIST_NULL;
+
+  switch (List->Flags & LISTDELMASK) 
+    {
+       case LISTDELCURR: return RemoveList(List); break;
+       case LISTDELHEAD: return DelHeadList(List); break;
+       case LISTDELTAIL: return DelTailList(List); break;
+       case LISTDELSPLAY: return SplayRemoveList(List); break;
+      default: return RemoveList(List); break; 
+    }
+
+  return LLIST_ERROR;
+} /* DelNode() */
 
 int RemoveList(listPtr List)
 {
@@ -425,7 +425,6 @@ void *PrevNode(listPtr List)
 void *IndexNode(listPtr List, int Index)
 {
   int Count;
-  void *Data;
 
   if ((List == NULL) ||
       ((List->Flags & LISTFLAGMASK) & LISTBTREE))      
@@ -444,9 +443,8 @@ void *IndexNode(listPtr List, int Index)
 int FreeList(listPtr List, ListFreeFunc DataFree)
 {
   int Delete;
-  int Count = 0;
 
-  if (List == NULL) return;
+  if (List == NULL) return LLIST_NULL;
 
   List->Current = List->Head;
   Delete = LLIST_NOERROR;
@@ -498,7 +496,6 @@ void SwapList(listPtr List)
 
 void SortList(listPtr List)
 {
-  listnodePtr Temp1, Temp2;
   int Move;
 
   if ((List == NULL) || (List->compare == NULL) ||

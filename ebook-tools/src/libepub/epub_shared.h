@@ -20,9 +20,10 @@ enum epub_metadata {
 };
 
 enum eiterator_type {
+  EINTERTOR_SPINE,
   EITERATOR_LINEAR,
   EITERATOR_NONLINEAR,
-
+  //  EITERATOR_TOUR,
 };
 
 #endif

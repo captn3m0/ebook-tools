@@ -70,9 +70,6 @@ int _ocf_parse_container(struct ocf *ocf) {
 
 void _ocf_dump(struct ocf *ocf) {  
   printf("Filename:\t %s\n", ocf->filename);
-  //  printf("Mimetype:\t %s\n", ocf->mimetype);
-  
-  struct root *curr = IndexNode(ocf->roots, 1);
 
   printf("Root(s):\n");
   DumpList(ocf->roots, (ListDumpFunc)_list_dump_root);
@@ -218,7 +215,7 @@ char *_ocf_root_by_type(struct ocf *ocf, char *type) {
 
   res = FindNode(ocf->roots, &look);
   if (res)
-    _ocf_get_file(ocf, res->fullpath, &rootXml);
+    _ocf_get_file(ocf, (char *)res->fullpath, &rootXml);
 
 
   if (! rootXml)

@@ -30,9 +30,10 @@ extern "C" {
   */
   void epub_set_debug(struct epub *epub, int debug);
   
-  
   int epub_get_ocf_file(struct epub *epub, const char *filename, char **data);
   
+  void epub_free_iterator(struct eiterator *it);
+
   /** 
       This function closes a given epub. It also frees the epub struct.
       So you can use it after calling this function.

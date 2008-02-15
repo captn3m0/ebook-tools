@@ -18,8 +18,8 @@ void usage(int code) {
     fprintf(stderr, "   -p\t Linear print book (normal reading)\n");
     fprintf(stderr, "   -pp\t Print the whole book\n");
     fprintf(stderr, "   -t <tour id>\t prints the tour <tour id>\n");
-    fprintf(stderr, "   -g Print the guide file as html (if exists)");
-    fprintf(stderr, "   -n Print the toc ncx file as html (if exists)");
+    fprintf(stderr, "   -g Print the guide file as html (if exists)\n");
+    fprintf(stderr, "   -n Print the toc ncx file as html (if exists)\n");
 
     exit(code);
 }

@@ -77,11 +77,11 @@ void _list_free_manifest(struct manifest *manifest) {
 int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2) {
 
   //  printf("comparing %s %s\n", root1->mediatype, root2->mediatype);
-  return strcmp(root1->mediatype, root2->mediatype);
+  return strcmp((char *)root1->mediatype, (char *)root2->mediatype);
 }
 
 int _list_cmp_manifest_by_id(struct manifest *m1, struct manifest *m2) {
-  return strcmp(m1->id, m2->id);
+  return strcmp((char *)m1->id, (char *)m2->id);
 }
 
 // Print root 
