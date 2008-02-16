@@ -170,7 +170,7 @@ struct eiterator *epub_get_iterator(struct epub *epub,
   it->cache = NULL;
 
   switch (type) {
-  case EINTERTOR_SPINE:
+  case EITERATOR_SPINE:
     it->curr = epub->opf->spine->Head;
     break;
   case EITERATOR_NONLINEAR:
@@ -202,7 +202,7 @@ char *epub_it_get_curr(struct eiterator *it) {
        
     switch (it->type) {
       struct manifest *tmp;
-    case EINTERTOR_SPINE:
+    case EITERATOR_SPINE:
     case EITERATOR_NONLINEAR:
     case EITERATOR_LINEAR:
       data = GetNodeData(it->curr);
@@ -227,7 +227,7 @@ char *epub_it_get_next(struct eiterator *it) {
 
   switch (it->type) {
 
-  case EINTERTOR_SPINE:
+  case EITERATOR_SPINE:
     it->curr = it->curr->Next;
     break;
     
