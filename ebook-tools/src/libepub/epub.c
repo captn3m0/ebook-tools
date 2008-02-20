@@ -305,6 +305,10 @@ int epub_get_ocf_file(struct epub *epub, const char *filename, char **data) {
 
 }
 
+int epub_get_data(struct epub *epub, const char *name, char **data) {
+  return _ocf_get_data_file(epub->ocf, name, data);
+}
+
 void epub_dump(struct epub *epub) {
   _ocf_dump(epub->ocf);
   _opf_dump(epub->opf);

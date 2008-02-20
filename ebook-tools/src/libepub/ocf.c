@@ -122,19 +122,18 @@ int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr) {
 
   struct zip_file *file = NULL;
   struct zip_stat *fileStat = malloc(sizeof(struct zip_stat));
-
   if (zip_stat(arch, filename, ZIP_FL_UNCHANGED, fileStat) == -1) {
     _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
     return -1;
   }
-  
+
   if (! (file = zip_fopen_index(arch, fileStat->index, ZIP_FL_NODIR))) {
     _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
     return -1;
   }
-  
+
   *fileStr = (char *)malloc((fileStat->size+1)* sizeof(char));
   
   int size;
@@ -199,7 +198,7 @@ struct ocf *_ocf_parse(struct epub *epub, const char *filename) {
 
 int _ocf_get_data_file(struct ocf *ocf, const char *filename, char **fileStr) {
   int size;
-  char *fullname = malloc((strlen(filename)+sizeof("OEBPS/")+1)*sizeof(char));
+  char *fullname = malloc((strlen(filename)+strlen("OEBPS/")+1)*sizeof(char));
   strcpy(fullname, "OEBPS/");
   strcat(fullname, filename);
   size = _ocf_get_file(ocf, fullname, fileStr);

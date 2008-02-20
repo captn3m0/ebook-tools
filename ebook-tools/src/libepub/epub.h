@@ -52,6 +52,8 @@ extern "C" {
   unsigned char **epub_get_metadata(struct epub *epub, enum epub_metadata type,
                                     int *size);
 
+  int epub_get_data(struct epub *epub, const char *name, char **data);
+
   struct eiterator *epub_get_iterator(struct epub *epub, 
                                       enum eiterator_type type, int opt);
 
