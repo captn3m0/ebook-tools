@@ -60,6 +60,8 @@ extern "C" {
   char *epub_it_get_next(struct eiterator *it);
 
   char *epub_it_get_curr(struct eiterator *it);
+  
+  char *epub_it_get_curr_url(struct eiterator *it);
 
   /**
      Cleans up after the library. Call this when you are done with the library. 

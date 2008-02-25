@@ -159,6 +159,17 @@ listnodePtr _get_spine_it_next(listnodePtr curr, int linear, int init) {
   return NULL;
 }
 
+char *_get_spine_it_url(struct eiterator *it) {
+  struct manifest *tmp;
+  void *data;
+  
+  data = GetNodeData(it->curr);
+  tmp = _opf_manifest_get_by_id(it->epub->opf, 
+                                ((struct spine *)data)->idref);
+  
+  return tmp->href;
+}
+
 struct eiterator *epub_get_iterator(struct epub *epub, 
                                     enum eiterator_type type, int opt) {
 
@@ -192,23 +203,30 @@ void epub_free_iterator(struct eiterator *it) {
   free(it);
 }
 
+
+char *epub_it_get_curr_url(struct eiterator *it) {
+  switch (it->type) {
+  case EITERATOR_SPINE:
+  case EITERATOR_NONLINEAR:
+  case EITERATOR_LINEAR:
+    return _get_spine_it_url(it);
+  }
+  
+  return NULL;
+}
+
 char *epub_it_get_curr(struct eiterator *it) {
 
   if (!it->curr)
     return NULL;
 
   if (!it->cache) {
-    void *data;
        
     switch (it->type) {
-      struct manifest *tmp;
     case EITERATOR_SPINE:
     case EITERATOR_NONLINEAR:
     case EITERATOR_LINEAR:
-      data = GetNodeData(it->curr);
-      tmp = _opf_manifest_get_by_id(it->epub->opf, 
-                                    ((struct spine *)data)->idref);
-      _ocf_get_data_file(it->epub->ocf, (char *)tmp->href, &(it->cache));
+      _ocf_get_data_file(it->epub->ocf, _get_spine_it_url(it), &(it->cache));
       break;
     }
   }
