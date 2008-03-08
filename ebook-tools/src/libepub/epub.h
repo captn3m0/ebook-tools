@@ -49,6 +49,12 @@ extern "C" {
   */
   void epub_dump(struct epub *epub);
   
+    
+  /** 
+      (Bad xml might cause some of it to be NULL).
+
+      @param epub the struct .
+  */
   unsigned char **epub_get_metadata(struct epub *epub, enum epub_metadata type,
                                     int *size);
 

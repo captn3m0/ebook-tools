@@ -4,7 +4,7 @@
 void _list_free_root(struct root *data) {
   if (data->mediatype)
     free(data->mediatype);
-  if (data->mediatype)
+  if (data->fullpath)
     free(data->fullpath);
   free(data);
 }
@@ -16,6 +16,32 @@ void _list_free_creator(struct creator *data) {
     free(data->fileAs);
   if (data->role)
     free(data->role);
+  free(data);
+}
+
+void _list_free_date(struct date *data) {
+  if (data->date)
+    free(data->date);
+  if (data->event)
+    free(data->event);  
+  free(data);
+}
+
+void _list_free_id(struct id *data) {
+  if (data->id)
+    free(data->id);
+  if (data->scheme)
+    free(data->scheme);
+  if (data->string)
+    free(data->string);
+  free(data);
+}
+
+void _list_free_meta(struct meta *data) {
+  if (data->name)
+    free(data->name);
+  if (data->content)
+    free(data->content);
   free(data);
 }
 
@@ -73,6 +99,18 @@ void _list_free_manifest(struct manifest *manifest) {
   free(manifest);
 } 
 
+void _list_free_toc(struct tocItem *item) {
+   
+  if (item->id)
+    free(item->id);
+  if (item->label)
+    free(item->label);
+  if (item->src)
+    free(item->src);
+
+  free(item);
+}
+
 // Compare 2 root structs by mediatype field
 int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2) {
 
@@ -82,6 +120,20 @@ int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2) {
 
 int _list_cmp_manifest_by_id(struct manifest *m1, struct manifest *m2) {
   return strcmp((char *)m1->id, (char *)m2->id);
+}
+
+int _list_cmp_toc_by_playorder(struct tocItem *t1, struct tocItem *t2) {
+  
+  if ((t1 == NULL) || (t2 == NULL))
+    return 0;
+
+  if (t1->playOrder > t2->playOrder)
+    return 1;
+
+  if (t1->playOrder < t2->playOrder)
+    return -1;
+
+  return 0;
 }
 
 // Print root 
@@ -115,8 +167,51 @@ void _list_dump_creator(struct creator *data) {
          ((data->fileAs)?data->fileAs:data->name)); 
 }
 
+void _list_dump_meta(struct meta *meta) {
+  if (meta->name)
+    printf("   %s", meta->name);
+  else 
+    printf("unspecified");
+  
+  printf(" : ");
+  
+  if (meta->content)
+    printf("%s", meta->content);
+  else 
+    printf("unspecified");
+  
+  printf("\n");
+}
+
+void _list_dump_id(struct id *id) {
+  printf("%s(", id->string);
+
+  if (id->scheme)
+    printf("%s", id->scheme);
+  else 
+    printf("unspecified");
+  
+  printf(":");
+  
+  if (id->id)
+    printf("%s", id->id);
+  else 
+    printf("unspecified");
+
+  printf(")\n");
+}
+
+void _list_dump_date(struct date *date) {
+  if (date->event)
+    printf("%s", date->event);
+  else 
+    printf("unspecified");
+  
+  printf(" : %s\n", date->date);
+}
+
 void _list_dump_guide(struct guide *guide) {
-  printf("%s: %s(%s)\n", guide->title, guide->href, guide->type);
+  printf("   %s -> %s(%s)\n", guide->href, guide->title, guide->type);
 }
 
 void _list_dump_site(struct site *site) {

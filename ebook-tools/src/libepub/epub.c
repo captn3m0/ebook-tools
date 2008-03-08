@@ -30,8 +30,41 @@ struct epub *epub_open(const char *filename, int debug) {
 }
 
 xmlChar *_getXmlStr(void *str) {
+  return xmlStrdup((xmlChar *)str); 
+}
 
-  return xmlStrdup((xmlChar *)str);
+xmlChar *_getIdStr(void *id) {
+  struct id *data = (struct id *)id;
+  xmlChar buff[10000];
+
+  xmlStrPrintf(buff, 10000, (xmlChar *)"%s (%s:%s)", 
+               ((data->scheme)?data->scheme:(xmlChar *)"Unspecified"), 
+               (data->id?data->id:(xmlChar *)"Unspecified"),
+                data->string);
+  
+  return xmlStrdup(buff);
+}
+
+xmlChar *_getDateStr(void *date) {
+  struct date *data = (struct date *)date;
+  xmlChar buff[10000];
+
+  xmlStrPrintf(buff, 10000, (xmlChar *)"%s: %s", 
+               ((data->event)?data->event:(xmlChar *)"Unspecified"), 
+               data->date);
+
+  return xmlStrdup(buff);
+}
+
+xmlChar *_getMetaStr(void *meta) {
+  struct meta *data = (struct meta *)meta;
+  xmlChar buff[10000];
+
+  xmlStrPrintf(buff, 10000, (xmlChar *)"%s: %s", 
+               ((data->name)?data->name:(xmlChar *)"Unspecified"),
+               ((data->content)?data->content:(xmlChar *)"Unspecified"));
+  
+  return xmlStrdup(buff);
 }
 
 xmlChar *_getRoleStr(void *creator) {
@@ -54,7 +87,7 @@ xmlChar **epub_get_metadata(struct epub *epub, enum epub_metadata type,
   switch(type) {
   case EPUB_ID:
     list = epub->opf->metadata->id;
-    getStr = _getXmlStr;
+    getStr = _getIdStr;
     break;
   case EPUB_TITLE:
     list = epub->opf->metadata->title;
@@ -74,7 +107,7 @@ xmlChar **epub_get_metadata(struct epub *epub, enum epub_metadata type,
     break;
   case EPUB_DATE:
     list = epub->opf->metadata->date;
-    getStr = _getXmlStr;
+    getStr = _getDateStr;
     break;
   case EPUB_TYPE:
     list = epub->opf->metadata->type;
@@ -104,7 +137,6 @@ xmlChar **epub_get_metadata(struct epub *epub, enum epub_metadata type,
     list = epub->opf->metadata->rights;
     getStr = _getXmlStr;
     break;
-
   case EPUB_CREATOR:
     list = epub->opf->metadata->creator;
     getStr = _getRoleStr;
@@ -113,13 +145,19 @@ xmlChar **epub_get_metadata(struct epub *epub, enum epub_metadata type,
     list = epub->opf->metadata->contrib;
     getStr = _getRoleStr;
     break;
+  case EPUB_META:
+    list = epub->opf->metadata->meta;
+    getStr = _getMetaStr;
+    break;
   }
 
   *size = list->Size;
-  if (! list->Size)
+  if (list->Size <= 0)
     return NULL;
 
   data = malloc(list->Size * sizeof(xmlChar *));
+  
+  list->Current = list->Head;
 
   data[0] = getStr(GetNode(list));
   for (i=1;i<list->Size;i++) {
@@ -167,7 +205,7 @@ char *_get_spine_it_url(struct eiterator *it) {
   tmp = _opf_manifest_get_by_id(it->epub->opf, 
                                 ((struct spine *)data)->idref);
   
-  return tmp->href;
+  return (char *)tmp->href;
 }
 
 struct eiterator *epub_get_iterator(struct epub *epub, 

@@ -17,6 +17,7 @@ enum epub_metadata {
   EPUB_RELATION,
   EPUB_COVERAGE,
   EPUB_RIGHTS,
+  EPUB_META,
 };
 
 enum eiterator_type {
@@ -24,6 +25,13 @@ enum eiterator_type {
   EITERATOR_LINEAR,
   EITERATOR_NONLINEAR,
   //  EITERATOR_TOUR,
+};
+
+enum titerator_type {
+  TITERATOR_TOC,
+  TITERATOR_GUIDE,
+  TITERATOR_PAGES,
+  TITERATOR_SPINE,
 };
 
 #endif

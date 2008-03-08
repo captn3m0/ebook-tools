@@ -36,11 +36,27 @@ struct root {
 
 
 struct ocf {
-  const char *filename; // The ebook filename
+  char *filename; // The ebook filename
   struct zip *arch; // The epub zip
   char *mimetype; // For debugging 
   listPtr roots; // list of OCF roots
   struct epub *epub; // back pointer
+};
+
+struct meta {
+  xmlChar *name;
+  xmlChar *content;
+};
+
+struct id {
+  xmlChar *id;
+  xmlChar *scheme;
+  xmlChar *string;
+};
+
+struct date {
+  xmlChar *date;
+  xmlChar *event;
 };
 
 struct creator {
@@ -65,6 +81,7 @@ struct metadata {
   listPtr relation;
   listPtr coverage;
   listPtr rights;
+  listPtr meta;
 };
 
 struct manifest {
@@ -99,8 +116,14 @@ struct tocItem {
   xmlChar *id;
   xmlChar *label;
   xmlChar *src;
-  int level;
+  int depth;
   int playOrder;
+};
+
+struct tocCategory {
+  struct tocLabel *info;
+  struct tocLabel *label;
+  listPtr tocList;
 };
 
 struct toc {
@@ -186,6 +209,14 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader);
 void _opf_parse_guide(struct opf *opf, xmlTextReaderPtr reader);
 void _opf_parse_tours(struct opf *opf, xmlTextReaderPtr reader);
 
+// parse toc
+void _opf_parse_toc(struct opf *opf, char *tocStr, int size);
+void _opf_parse_navlist(struct opf *opf, xmlTextReaderPtr reader);
+void _opf_parse_navmap(struct opf *opf, xmlTextReaderPtr reader);
+void _opf_parse_pagelist(struct opf *opf, xmlTextReaderPtr reader);
+void _opf_parse_navlabel(struct tocItem *item, xmlTextReaderPtr reader);
+void _opf_parse_navinfo(struct tocItem *item, xmlTextReaderPtr reader);
+
 struct manifest *_opf_manifest_get_by_id(struct opf *opf, xmlChar* id);
 
 // epub functions
@@ -196,18 +227,30 @@ void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
 
 // List operations
 void _list_free_root(struct root *data);
+
 void _list_free_creator(struct creator *data);
+void _list_free_date(struct date *date);
+void _list_free_id(struct id *id);
+void _list_free_meta(struct meta *meta);
+
 void _list_free_spine(struct spine *spine);
 void _list_free_manifest(struct manifest *manifest);
 void _list_free_guide(struct guide *guide);
 void _list_free_tours(struct tour *tour);
+void _list_free_toc(struct tocItem *item);
 
 int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2);
 int _list_cmp_manifest_by_id(struct manifest *m1, struct manifest *m2);
+int _list_cmp_toc_by_playorder(struct tocItem *t1, struct tocItem *t2);
 
 void _list_dump_root(struct root *root);
+
 void _list_dump_string(char *string);
 void _list_dump_creator(struct creator *data);
+void _list_dump_date(struct date *date);
+void _list_dump_id(struct id *id);
+void _list_dump_meta(struct meta *meta);
+
 void _list_dump_spine(struct spine *spine);
 void _list_dump_guide(struct guide *guide);
 void _list_dump_tour(struct tour *tour);
