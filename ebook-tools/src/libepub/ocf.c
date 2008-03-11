@@ -44,11 +44,9 @@ int _ocf_parse_container(struct ocf *ocf) {
           xmlTextReaderGetAttribute(reader, (xmlChar *)"full-path");
         AddNode(ocf->roots, NewListNode(ocf->roots, newroot));
   
-
         _epub_print_debug(ocf->epub, DEBUG_INFO, 
                           "found root in %s media-type is %s",
                           newroot->fullpath, newroot->mediatype);
-
       }
 
       ret = xmlTextReaderRead(reader);
@@ -119,18 +117,23 @@ int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr) {
   
   struct epub *epub = ocf->epub;
   struct zip *arch = ocf->arch;
-
+  
   struct zip_file *file = NULL;
   struct zip_stat *fileStat = malloc(sizeof(struct zip_stat));
+
+  *fileStr = NULL;
+
   if (zip_stat(arch, filename, ZIP_FL_UNCHANGED, fileStat) == -1) {
     _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
+    free(fileStat);
     return -1;
   }
 
   if (! (file = zip_fopen_index(arch, fileStat->index, ZIP_FL_NODIR))) {
     _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
+    free(fileStat);
     return -1;
   }
 
@@ -149,6 +152,9 @@ int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr) {
   if (zip_fclose(file) == -1) {
     _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
+    free(*fileStr);
+    *fileStr = NULL;
+    free(fileStat);
     return -1;
   }
   

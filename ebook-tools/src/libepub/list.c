@@ -99,16 +99,30 @@ void _list_free_manifest(struct manifest *manifest) {
   free(manifest);
 } 
 
-void _list_free_toc(struct tocItem *item) {
-   
-  if (item->id)
-    free(item->id);
-  if (item->label)
-    free(item->label);
-  if (item->src)
-    free(item->src);
+void _list_free_toc_label(struct tocLabel *tl) {
+  if (tl->lang)
+    free(tl->lang);
+  if (tl->dir)
+    free(tl->dir);
+  if (tl->text)
+    free(tl->text);
+  free(tl);
+}
 
-  free(item);
+void _list_free_toc_item(struct tocItem *ti) {
+
+  if (ti->id)
+    free(ti->id);
+  if (ti->src)
+    free(ti->src);
+  if (ti->class)
+    free(ti->class);
+  if (ti->type)
+    free(ti->type);
+
+  FreeList(ti->label, (ListFreeFunc)_list_free_toc_label);
+
+  free(ti);
 }
 
 // Compare 2 root structs by mediatype field

@@ -112,24 +112,39 @@ struct tour {
   listPtr sites;
 };
 
+// Struct for navLabel and navInfo
+struct tocLabel {
+  xmlChar *lang;
+  xmlChar *dir;
+  xmlChar *text;
+};
+
+// struct for navPoint, pageTarget, navTarget 
 struct tocItem {
   xmlChar *id;
-  xmlChar *label;
   xmlChar *src;
+  xmlChar *class;
+  xmlChar *type; //pages
+  listPtr label;
   int depth;
   int playOrder;
+  int value;
 };
 
+// struct for navMap, pageList, navList
 struct tocCategory {
-  struct tocLabel *info;
-  struct tocLabel *label;
-  listPtr tocList;
+  xmlChar *id;
+  xmlChar *class;
+  listPtr info; //tocLabel
+  listPtr label; //tocLabel
+  listPtr items; //tocItem
 };
 
+// General toc struct
 struct toc {
-  listPtr navMap; 
-  listPtr pageList;
-  listPtr navList;
+  struct tocCategory *navMap; 
+  struct tocCategory *pageList;
+  struct tocCategory *navList;
   listPtr playOrder;
 };
 
@@ -214,8 +229,11 @@ void _opf_parse_toc(struct opf *opf, char *tocStr, int size);
 void _opf_parse_navlist(struct opf *opf, xmlTextReaderPtr reader);
 void _opf_parse_navmap(struct opf *opf, xmlTextReaderPtr reader);
 void _opf_parse_pagelist(struct opf *opf, xmlTextReaderPtr reader);
-void _opf_parse_navlabel(struct tocItem *item, xmlTextReaderPtr reader);
-void _opf_parse_navinfo(struct tocItem *item, xmlTextReaderPtr reader);
+struct tocLabel *_opf_parse_navlabel(struct opf *opf, xmlTextReaderPtr reader);
+void _opf_free_toc_category(struct tocCategory *tc);
+void _opf_free_toc(struct toc *toc);
+struct toc *_opf_init_toc();
+struct tocCategory *_opf_init_toc_category();
 
 struct manifest *_opf_manifest_get_by_id(struct opf *opf, xmlChar* id);
 
@@ -237,7 +255,9 @@ void _list_free_spine(struct spine *spine);
 void _list_free_manifest(struct manifest *manifest);
 void _list_free_guide(struct guide *guide);
 void _list_free_tours(struct tour *tour);
-void _list_free_toc(struct tocItem *item);
+
+void _list_free_toc_label(struct tocLabel *tl);
+void _list_free_toc_item(struct tocItem *ti);
 
 int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2);
 int _list_cmp_manifest_by_id(struct manifest *m1, struct manifest *m2);
