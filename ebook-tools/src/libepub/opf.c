@@ -9,6 +9,7 @@ struct opf *_opf_parse(struct epub *epub, char *opfStr) {
   opf->tours = NULL;
   opf->toc = NULL;
   
+ 
   xmlTextReaderPtr reader;
   int ret;
   
@@ -329,10 +330,37 @@ struct tocLabel *_opf_parse_navlabel(struct opf *opf, xmlTextReaderPtr reader) {
   return new;
 }
 
+struct tocItem *_opf_init_toc_item(int depth) {
+  struct tocItem *item = malloc(sizeof(struct tocItem));
+
+  item->label = NULL;
+  item->type = NULL;
+  item->src = NULL;
+  item->depth = depth;
+  item->id = NULL;
+  item->class = NULL;
+  item->playOrder = -1;
+  item->value = -1;
+
+  return item;
+}
+
+int _get_attribute_as_positive_int(xmlTextReaderPtr reader, const xmlChar *name) {
+  xmlChar *str = xmlTextReaderGetAttribute(reader, name);
+  int ret = -1;
+
+  if (str) { 
+    ret = atoi((char *)str);
+    free(str);
+  } 
+
+  return ret;
+}
+
 void _opf_parse_navmap(struct opf *opf, xmlTextReaderPtr reader) {
   int ret;
   int depth = 0;
-  xmlChar *orderStr;
+
   struct tocCategory *tc = _opf_init_toc_category();
   struct tocItem *item = NULL;
 
@@ -355,23 +383,18 @@ void _opf_parse_navmap(struct opf *opf, xmlTextReaderPtr reader) {
           AddNode(opf->toc->playOrder, NewListNode(opf->toc->playOrder, item));
           item = NULL;
         }
+
         depth++;
-        item = malloc(sizeof(struct tocItem));
-        item->label = NULL;
-        item->type = NULL;
-        item->src = NULL;
-        item->depth = depth;
+        item = _opf_init_toc_item(depth);
         item->id = xmlTextReaderGetAttribute(reader, (xmlChar *)"id");
         item->class = xmlTextReaderGetAttribute(reader, (xmlChar *)"class");
         
-        orderStr = xmlTextReaderGetAttribute(reader, (xmlChar *)"playOrder");
-        if (orderStr) { 
-          item->playOrder = atoi((char *)orderStr);
-          free(orderStr);
-        } else {
+        item->playOrder = _get_attribute_as_positive_int(reader, (xmlChar *)"playOrder");
+        if (item->playOrder == -1) {
           _epub_print_debug(opf->epub, DEBUG_WARNING, 
-                            "missing play order in nav point element");
+                            "- missing play order in nav point element");
         }
+     
       } else if (xmlTextReaderNodeType(reader) == 15) {
         if (item) {
           _epub_print_debug(opf->epub, DEBUG_INFO, 
@@ -425,7 +448,7 @@ void _opf_parse_navmap(struct opf *opf, xmlTextReaderPtr reader) {
 
 void _opf_parse_navlist(struct opf *opf, xmlTextReaderPtr reader) {
   int ret;
-  xmlChar *orderStr;
+
   struct tocCategory *tc = _opf_init_toc_category();
   struct tocItem *item = NULL;
 
@@ -440,26 +463,20 @@ void _opf_parse_navlist(struct opf *opf, xmlTextReaderPtr reader) {
 
     if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navTarget")) {
       if (xmlTextReaderNodeType(reader) == 1) {
-        item = malloc(sizeof(struct tocItem));
-        item->label = NULL;
-        item->type = NULL;
-        item->src = NULL;
-        item->depth = 1;
+        item = _opf_init_toc_item(1);
         item->id = xmlTextReaderGetAttribute(reader, (xmlChar *)"id");
         item->class = xmlTextReaderGetAttribute(reader, (xmlChar *)"class");
         
-        orderStr = xmlTextReaderGetAttribute(reader, (xmlChar *)"playOrder");
-        if (orderStr) { 
-          item->playOrder = atoi((char *)orderStr);
-          free(orderStr);
-        } else {
+        item->playOrder = _get_attribute_as_positive_int(reader, (xmlChar *)"playOrder");
+        if (item->playOrder == -1) {
           _epub_print_debug(opf->epub, DEBUG_WARNING, 
-                            "missing play order in nav target element");
+                            "- missing play order in nav target element");
         }
+        item->value = _get_attribute_as_positive_int(reader, (xmlChar *)"value"); 
       } else if (xmlTextReaderNodeType(reader) == 15) {
         if (item) {
           _epub_print_debug(opf->epub, DEBUG_INFO, 
-                            "adding nav point item->%s %s (d:%d,p:%d)", 
+                            "adding nav target item->%s %s (d:%d,p:%d)", 
                             item->id, item->src, item->depth, item->playOrder);
           AddNode(tc->items, NewListNode(tc->items, item)); 
           AddNode(opf->toc->playOrder, NewListNode(opf->toc->playOrder, item));
@@ -470,13 +487,13 @@ void _opf_parse_navlist(struct opf *opf, xmlTextReaderPtr reader) {
       }
     }
   
-
+    
     // ignore non starting tags
     if (xmlTextReaderNodeType(reader) != 1) {
       ret = xmlTextReaderRead(reader);
       continue;
     }
-       if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navLabel")) {
+    if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navLabel")) {
       if (item) {
         if (! item->label)
           item->label = NewListAlloc(LIST, NULL, NULL, NULL); //tocLabel
@@ -487,11 +504,11 @@ void _opf_parse_navlist(struct opf *opf, xmlTextReaderPtr reader) {
                                        _opf_parse_navlabel(opf, reader)));
       }
     } else if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navInfo")) {
-        AddNode(tc->info, NewListNode(tc->info, 
-                                      _opf_parse_navlabel(opf, reader)));
-        if (item)
-          _epub_print_debug(opf->epub, DEBUG_WARNING, 
-                            "nav info inside nav target element");
+      AddNode(tc->info, NewListNode(tc->info, 
+                                    _opf_parse_navlabel(opf, reader)));
+      if (item)
+        _epub_print_debug(opf->epub, DEBUG_WARNING, 
+                          "nav info inside nav target element");
     } else 
       if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"content")) {
         if (item)
@@ -501,7 +518,7 @@ void _opf_parse_navlist(struct opf *opf, xmlTextReaderPtr reader) {
                             "content not inside nav target element");  
       }
 
-       ret = xmlTextReaderRead(reader);
+    ret = xmlTextReaderRead(reader);
   }
   
   opf->toc->navList = tc;
@@ -511,27 +528,81 @@ void _opf_parse_navlist(struct opf *opf, xmlTextReaderPtr reader) {
 
 void _opf_parse_pagelist(struct opf *opf, xmlTextReaderPtr reader) {
   int ret;
-  struct tocItem *item;
-
+  struct tocCategory *tc = _opf_init_toc_category();
+  struct tocItem *item = NULL;
+  
+  tc->id = xmlTextReaderGetAttribute(reader, (xmlChar *)"id");
+  tc->class = xmlTextReaderGetAttribute(reader, (xmlChar *)"class");
+  
   _epub_print_debug(opf->epub, DEBUG_INFO, "parsing page list");
-
+  
   ret = xmlTextReaderRead(reader);
   while (ret == 1 && 
          xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"pageList")) {
+    if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"pageTarget")) {
+      if (xmlTextReaderNodeType(reader) == 1) {
+        item = _opf_init_toc_item(1);
+        item->id = xmlTextReaderGetAttribute(reader, (xmlChar *)"id");
+        item->class = xmlTextReaderGetAttribute(reader, (xmlChar *)"class");
+        item->type  = xmlTextReaderGetAttribute(reader, (xmlChar *)"type");
+        
+        item->playOrder = _get_attribute_as_positive_int(reader, (xmlChar *)"playOrder");
+        if (item->playOrder == -1) {
+          _epub_print_debug(opf->epub, DEBUG_WARNING, 
+                            "- missing play order in page target element");
+        }
+        item->value = _get_attribute_as_positive_int(reader, (xmlChar *)"value"); 
+      } else if (xmlTextReaderNodeType(reader) == 15) {
+        if (item) {
+          _epub_print_debug(opf->epub, DEBUG_INFO, 
+                            "adding page target item->%s %s (d:%d,p:%d)", 
+                            item->id, item->src, item->depth, item->playOrder);
+          AddNode(tc->items, NewListNode(tc->items, item)); 
+          AddNode(opf->toc->playOrder, NewListNode(opf->toc->playOrder, item));
+          item = NULL;
+        } else {
+          _epub_print_debug(opf->epub, DEBUG_ERROR, "empty item in nav list"); 
+        }
+      }
+    }
 
-    item = malloc(sizeof(struct tocItem));
-    item->depth = 1;
-
-    // ignore non starting tags
+     // ignore non starting tags
     if (xmlTextReaderNodeType(reader) != 1) {
       ret = xmlTextReaderRead(reader);
       continue;
     }
 
-    if (xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navLabel")) {
-      _opf_parse_navlabel(item, reader);
-    }
+    if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navLabel")) {
+      if (item) {
+        if (! item->label)
+          item->label = NewListAlloc(LIST, NULL, NULL, NULL); //tocLabel
+        AddNode(item->label, NewListNode(item->label, 
+                                         _opf_parse_navlabel(opf, reader)));
+      } else { // Not inside navpoint
+        AddNode(tc->label, NewListNode(tc->label, 
+                                       _opf_parse_navlabel(opf, reader)));
+      }
+    } else if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navInfo")) {
+      AddNode(tc->info, NewListNode(tc->info, 
+                                    _opf_parse_navlabel(opf, reader)));
+      if (item)
+        _epub_print_debug(opf->epub, DEBUG_WARNING, 
+                          "nav info inside page target element");
+    } else 
+      if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"content")) {
+        if (item)
+          item->src = xmlTextReaderGetAttribute(reader, (xmlChar *)"src");
+        else
+          _epub_print_debug(opf->epub, DEBUG_WARNING, 
+                            "content not inside nav target element");  
+      }
+
+    ret = xmlTextReaderRead(reader);
   }
+  
+  opf->toc->navList = tc;
+  _epub_print_debug(opf->epub, DEBUG_INFO, "finished parsing page list");
+    
 }
 
 void _opf_parse_toc(struct opf *opf, char *tocStr, int size) {

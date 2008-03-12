@@ -100,10 +100,14 @@ void _ocf_close(struct ocf *ocf) {
   
   FreeList(ocf->roots, (ListFreeFunc)_list_free_root);
 
-  free(ocf->filename);
+  if (ocf->filename)
+    free(ocf->filename);
   if (ocf->mimetype)
     free(ocf->mimetype);
+  if (ocf->datapath)
+    free(ocf->datapath);
   free(ocf);
+  
 }
 
 // returns index if file exists else -1
@@ -178,6 +182,7 @@ struct ocf *_ocf_parse(struct epub *epub, const char *filename) {
   
   struct ocf *ocf = malloc(sizeof(struct ocf));
   ocf->epub = epub;
+  ocf->datapath = NULL;
   ocf->roots = NewListAlloc(LIST, NULL, NULL, 
                             (NodeCompareFunc)_list_cmp_root_by_mediatype);
   ocf->filename = malloc(sizeof(char)*(strlen(filename)+1));
@@ -205,13 +210,28 @@ struct ocf *_ocf_parse(struct epub *epub, const char *filename) {
 
 int _ocf_get_data_file(struct ocf *ocf, const char *filename, char **fileStr) {
   int size;
-  char *fullname = malloc((strlen(filename)+strlen("OEBPS/")+1)*sizeof(char));
-  strcpy(fullname, "OEBPS/");
+  char *fullname = malloc((strlen(filename)+strlen(ocf->datapath)+1)*sizeof(char));
+  strcpy(fullname, ocf->datapath);
   strcat(fullname, filename);
   size = _ocf_get_file(ocf, fullname, fileStr);
   free(fullname);
 
   return size;
+}
+
+char *_ocf_root_fullpath_by_type(struct ocf *ocf, char *type) {
+  struct root look = {(xmlChar *)type, NULL};
+  struct root *res;
+  
+  res = FindNode(ocf->roots, &look);
+  if (res)
+    return strdup((char *)res->fullpath);
+  
+  _epub_print_debug(ocf->epub, DEBUG_WARNING, 
+                      "type %s for root not found", type);
+  return NULL;
+    
+    
 }
 
 char *_ocf_root_by_type(struct ocf *ocf, char *type) {

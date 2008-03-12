@@ -36,6 +36,7 @@ struct root {
 
 
 struct ocf {
+  char *datapath; // The path that the data files relative to 
   char *filename; // The ebook filename
   struct zip *arch; // The epub zip
   char *mimetype; // For debugging 
@@ -208,6 +209,7 @@ int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr);
 int _ocf_get_data_file(struct ocf *ocf, const char *filename, char **fileStr);
 int _ocf_check_file(struct ocf *ocf, const char *filename);
 char *_ocf_root_by_type(struct ocf *ocf, char *type);
+char *_ocf_root_fullpath_by_type(struct ocf *ocf, char *type);
 
 // Parsing ocf
 int _ocf_parse_container(struct ocf *ocf);

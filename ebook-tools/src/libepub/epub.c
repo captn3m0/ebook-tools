@@ -3,6 +3,9 @@
 #include <stdarg.h>
 
 struct epub *epub_open(const char *filename, int debug) {
+  char *opfName = NULL;
+  char *opfStr = NULL;
+
   struct epub *epub = malloc(sizeof(struct epub));
   epub->ocf = NULL;
   epub->opf = NULL;
@@ -18,12 +21,37 @@ struct epub *epub_open(const char *filename, int debug) {
     return NULL;
   }
 
-  char *opfStr = _ocf_root_by_type(epub->ocf, "application/oebps-package+xml");
+  opfName = _ocf_root_fullpath_by_type(epub->ocf, 
+                                             "application/oebps-package+xml");
+  if (!opfName) {
+    epub_close(epub);
+    return NULL;
+  }
+
+  epub->ocf->datapath = malloc(sizeof(char) *(strlen(opfName) +1));
+  char *index = strrchr(opfName, '/');
+  if (index) {
+    strncpy(epub->ocf->datapath, opfName, index + 1 - opfName); 
+    epub->ocf->datapath[index - opfName + 1] = 0;
+  }    
+  else {
+    epub->ocf->datapath[0] = '/';
+    epub->ocf->datapath[1] = 0;
+  }
+
+  _epub_print_debug(epub, DEBUG_INFO, "data path is %s", epub->ocf->datapath );
+
+  _ocf_get_file(epub->ocf, opfName, &opfStr);
+  free(opfName);
+    
+
   if (!opfStr) {
     epub_close(epub);
     return NULL;
   }
+
   epub->opf = _opf_parse(epub, opfStr);
+  
   free(opfStr);
 
   return epub;
