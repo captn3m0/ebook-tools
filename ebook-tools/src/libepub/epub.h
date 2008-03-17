@@ -7,6 +7,7 @@ struct epub;
 
 /** \struct eiterator is a private iterator struct */
 struct eiterator;
+struct titerator;
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,6 +69,21 @@ extern "C" {
   char *epub_it_get_curr(struct eiterator *it);
   
   char *epub_it_get_curr_url(struct eiterator *it);
+
+  struct titerator *epub_get_titerator(struct epub *epub, 
+                                       enum titerator_type type, int opt);
+
+  int epub_tit_curr_valid(struct titerator *tit);
+
+  int epub_tit_get_curr_depth(struct titerator *tit);
+
+  char *epub_tit_get_curr_link(struct titerator *tit);
+
+  char *epub_tit_get_curr_label(struct titerator *tit);
+
+  void epub_free_titerator(struct titerator *tit);
+  
+  int epub_tit_next(struct titerator *tit);
 
   /**
      Cleans up after the library. Call this when you are done with the library. 

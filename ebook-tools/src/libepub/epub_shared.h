@@ -28,10 +28,9 @@ enum eiterator_type {
 };
 
 enum titerator_type {
-  TITERATOR_TOC,
+  TITERATOR_NAVMAP,
   TITERATOR_GUIDE,
   TITERATOR_PAGES,
-  TITERATOR_SPINE,
 };
 
 #endif

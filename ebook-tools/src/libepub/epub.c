@@ -384,9 +384,140 @@ void _epub_print_debug(struct epub *epub, int debug, char *format, ...) {
   va_end(ap);
 }
 
+int epub_tit_next(struct titerator *tit) {
+  listnodePtr curr = tit->next;
+  if (! curr) {
+    tit->valid = 0;
+    return 0;
+  }
+
+  tit->next = curr->Next;
+  
+  switch (tit->type) {
+    struct guide* guide;
+    struct tocItem *ti;
+
+  case TITERATOR_GUIDE:
+    guide = GetNodeData(curr);
+    tit->cache.label = (char *)guide->title;
+    tit->cache.link = (char *)guide->href;
+    tit->cache.depth = 1;
+
+    break;
+
+  case TITERATOR_NAVMAP:
+  case TITERATOR_PAGES:
+    ti = GetNodeData(curr);
+    tit->cache.label = 
+      (char *)_opf_label_get_by_doc_lang(tit->epub->opf, ti->label);
+
+    if (! tit->cache.label)
+      tit->cache.label = (char *)ti->id;
+
+    tit->cache.depth = ti->depth;
+    tit->cache.link = (char *)ti->src;
+    break;
+
+  }
+
+  tit->valid = 1;
+  return 1;
+}
+
+struct titerator *epub_get_titerator(struct epub *epub, 
+                                     enum titerator_type type, int opt) {
+  struct titerator *it;
+
+  if (! epub->opf->toc)
+    return NULL;
+
+  switch (type) {
+  case TITERATOR_NAVMAP:
+    if (! epub->opf->toc->navMap)
+      return NULL;
+    break;
+  case TITERATOR_GUIDE:
+    if (! epub->opf->guide)
+      return NULL;
+    break;
+  case TITERATOR_PAGES:
+    if (! epub->opf->toc->pageList)
+      return NULL;
+    break;
+  }
+
+  it = malloc(sizeof(struct titerator));
+  it->type = type;
+  it->epub = epub;
+  it->opt = opt;
+  it->next = NULL;
+  it->valid = 0;
+
+  it->cache.label = NULL;
+  it->cache.link = NULL;
+  it->cache.depth = -1;
+
+
+  switch (type) {
+  case TITERATOR_NAVMAP:
+    it->next = epub->opf->toc->navMap->items->Head;
+    if (epub->opf->toc->navMap->label) {
+      it->cache.label = 
+        (char *)_opf_label_get_by_doc_lang(epub->opf, 
+                                           epub->opf->toc->navMap->label);
+      it->cache.depth = 0;
+    }
+    it->valid = 1;
+    break;
+
+  case TITERATOR_GUIDE:
+    it->next = epub->opf->guide->Head;
+    break;
+    
+  case TITERATOR_PAGES:
+    it->next = epub->opf->toc->pageList->items->Head;
+    if (epub->opf->toc->pageList->label) {
+      it->cache.label = 
+        (char *)_opf_label_get_by_doc_lang(epub->opf, 
+                                           epub->opf->toc->pageList->label);
+      it->cache.depth = 1;
+    }
+    it->valid = 1;
+    break;
+  }
+  
+  if ( ! it->cache.label)
+    epub_tit_next(it);
+  
+  return it;
+}
+
+int epub_tit_curr_valid(struct titerator *tit) {
+  return tit->valid;
+}
+
+char *epub_tit_get_curr_label(struct titerator *tit) {
+  return strdup(tit->cache.label);
+}
+
+int epub_tit_get_curr_depth(struct titerator *tit) {
+  return tit->cache.depth;
+}
+
+char *epub_tit_get_curr_link(struct titerator *tit) {
+  return strdup(tit->cache.link);
+
+}
+
+void epub_free_titerator(struct titerator *tit) {
+
+  free(tit);
+}
+  
+
+
 int epub_get_ocf_file(struct epub *epub, const char *filename, char **data) {
   return _ocf_get_file(epub->ocf, filename, data);
-
 }
 
 int epub_get_data(struct epub *epub, const char *name, char **data) {

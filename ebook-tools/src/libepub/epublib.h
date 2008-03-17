@@ -199,6 +199,20 @@ struct eiterator {
   char *cache;
 };
 
+struct tit_info {
+  char *label;
+  int depth;
+  char *link;
+};
+
+struct titerator {
+  enum titerator_type type;
+  struct epub *epub;
+  int opt;
+  listnodePtr next;
+  struct tit_info cache;
+  int valid;
+};
 
 // Ocf functions
 struct ocf *_ocf_parse(struct epub *epub, const char *filename);
@@ -237,6 +251,9 @@ void _opf_free_toc(struct toc *toc);
 struct toc *_opf_init_toc();
 struct tocCategory *_opf_init_toc_category();
 
+xmlChar *_opf_label_get_by_lang(struct opf *opf, listPtr label, char *lang);
+xmlChar *_opf_label_get_by_doc_lang(struct opf *opf, listPtr label);
+
 struct manifest *_opf_manifest_get_by_id(struct opf *opf, xmlChar* id);
 
 // epub functions
@@ -264,6 +281,7 @@ void _list_free_toc_item(struct tocItem *ti);
 int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2);
 int _list_cmp_manifest_by_id(struct manifest *m1, struct manifest *m2);
 int _list_cmp_toc_by_playorder(struct tocItem *t1, struct tocItem *t2);
+int _list_cmp_label_by_lang(struct tocLabel *t1, struct tocLabel *t2);
 
 void _list_dump_root(struct root *root);
 

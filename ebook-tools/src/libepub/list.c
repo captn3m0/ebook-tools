@@ -128,12 +128,19 @@ void _list_free_toc_item(struct tocItem *ti) {
 // Compare 2 root structs by mediatype field
 int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2) {
 
-  //  printf("comparing %s %s\n", root1->mediatype, root2->mediatype);
   return strcmp((char *)root1->mediatype, (char *)root2->mediatype);
 }
 
 int _list_cmp_manifest_by_id(struct manifest *m1, struct manifest *m2) {
   return strcmp((char *)m1->id, (char *)m2->id);
+}
+
+int _list_cmp_label_by_lang(struct tocLabel *t1, struct tocLabel *t2) {
+
+  if (! t1->lang || ! t2->lang)
+    return 0;
+
+  return strcmp((char *)t1->lang, (char *)t2->lang);;
 }
 
 int _list_cmp_toc_by_playorder(struct tocItem *t1, struct tocItem *t2) {

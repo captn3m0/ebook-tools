@@ -644,6 +644,7 @@ void _opf_parse_toc(struct opf *opf, char *tocStr, int size) {
     _epub_print_debug(opf->epub, DEBUG_ERROR, "unable to open toc reader");
   }
 
+  SortList(opf->toc->playOrder);
   _epub_print_debug(opf->epub, DEBUG_INFO, "finished parsing toc");
 }      
 
@@ -853,6 +854,21 @@ void _opf_parse_tours(struct opf *opf, xmlTextReaderPtr reader) {
   }
 
   free(local);
+}
+
+xmlChar *_opf_label_get_by_lang(struct opf *opf, listPtr label, char *lang) {
+  struct tocLabel data, *tmp;
+  data.lang = (xmlChar *)lang;
+  label->compare = (NodeCompareFunc)_list_cmp_label_by_lang;
+  tmp =  FindNode(label, &data);
+  return (tmp?tmp->text:NULL);
+  
+}
+
+xmlChar *_opf_label_get_by_doc_lang(struct opf *opf, listPtr label) {
+  opf->metadata->lang->Current = opf->metadata->lang->Head;
+  return _opf_label_get_by_lang(opf, label, 
+                                (char *)GetNode(opf->metadata->lang));
 }
 
 void _opf_dump(struct opf *opf) {
