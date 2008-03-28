@@ -428,20 +428,17 @@ struct titerator *epub_get_titerator(struct epub *epub,
                                      enum titerator_type type, int opt) {
   struct titerator *it;
 
-  if (! epub->opf->toc)
-    return NULL;
-
   switch (type) {
   case TITERATOR_NAVMAP:
-    if (! epub->opf->toc->navMap)
+    if (! epub->opf->toc || ! epub->opf->toc->navMap)
       return NULL;
     break;
   case TITERATOR_GUIDE:
-    if (! epub->opf->guide)
+    if (! epub->opf->guide) 
       return NULL;
     break;
   case TITERATOR_PAGES:
-    if (! epub->opf->toc->pageList)
+    if (! epub->opf->toc || epub->opf->toc->pageList)
       return NULL;
     break;
   }
