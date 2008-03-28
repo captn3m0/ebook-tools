@@ -4,4 +4,4 @@ add_executable (einfo einfo.c)
 target_link_libraries (einfo epub)    
 
 install ( TARGETS einfo DESTINATION bin )
-install ( FILES lit2epub DESTINATION bin )
+install ( PROGRAMS lit2epub DESTINATION bin )
