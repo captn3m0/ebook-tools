@@ -128,10 +128,15 @@ void _list_free_toc_item(struct tocItem *ti) {
 // Compare 2 root structs by mediatype field
 int _list_cmp_root_by_mediatype(struct root *root1, struct root *root2) {
 
+  if (root1->mediatype == NULL || root2->mediatype == NULL)
+    return NULL;
+
   return strcmp((char *)root1->mediatype, (char *)root2->mediatype);
 }
 
 int _list_cmp_manifest_by_id(struct manifest *m1, struct manifest *m2) {
+  if (m1->id == NULL || m2->id == NULL)
+    return NULL;
   return strcmp((char *)m1->id, (char *)m2->id);
 }
 

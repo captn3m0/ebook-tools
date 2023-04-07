@@ -900,25 +900,32 @@ xmlChar *_opf_label_get_by_doc_lang(struct opf *opf, listPtr label) {
 }
 
 void _opf_dump(struct opf *opf) {
-  printf("Title(s):\n   ");
-  DumpList(opf->metadata->title, (ListDumpFunc)_list_dump_string);
-  printf("Creator(s):\n   ");
-  DumpList(opf->metadata->creator, (ListDumpFunc)_list_dump_creator);
-  printf("Identifier(s):\n   ");
-  DumpList(opf->metadata->id, (ListDumpFunc)_list_dump_id);
-  printf("Reading order:\n");
-  DumpList(opf->spine, (ListDumpFunc)_list_dump_spine);
-  printf("\n");
+  if (opf->metadata) {
+    printf("Title(s):\n   ");
+    DumpList(opf->metadata->title, (ListDumpFunc)_list_dump_string);
+    printf("Creator(s):\n   ");
+    DumpList(opf->metadata->creator, (ListDumpFunc)_list_dump_creator);
+    printf("Identifier(s):\n   ");
+    DumpList(opf->metadata->id, (ListDumpFunc)_list_dump_id);
+    if (opf->metadata->meta->Size != 0) {
+      printf("Extra local metadata:\n");
+      DumpList(opf->metadata->meta, (ListDumpFunc)_list_dump_meta);
+    }
+  }
+  if (opf->spine) {
+    printf("Reading order:\n");
+    DumpList(opf->spine, (ListDumpFunc)_list_dump_spine);
+    printf("\n");
+  }
+  
   if (opf->guide) {
     printf("Guide:\n");
     DumpList(opf->guide, (ListDumpFunc)_list_dump_guide);
   }
+
   if (opf->tours)
     DumpList(opf->tours, (ListDumpFunc)_list_dump_tour);
-  if (opf->metadata->meta->Size != 0) {
-    printf("Extra local metadata:\n");
-    DumpList(opf->metadata->meta, (ListDumpFunc)_list_dump_meta);
-  }
+  
 }
 
 void _opf_close(struct opf *opf) {

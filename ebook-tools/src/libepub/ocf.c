@@ -273,9 +273,9 @@ int _ocf_get_data_file(struct ocf *ocf, const char *filename, char **fileStr) {
 char *_ocf_root_fullpath_by_type(struct ocf *ocf, const char *type) {
   struct root look = {(xmlChar *)type, NULL};
   struct root *res;
-  
+
   res = FindNode(ocf->roots, &look);
-  if (res)
+  if (res && res->fullpath)
     return strdup((char *)res->fullpath);
   
   _epub_print_debug(ocf->epub, DEBUG_WARNING, 
